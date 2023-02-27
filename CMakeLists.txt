@@ -7,6 +7,6 @@ project(ShabbyRenderer)
 
 set( CMAKE_CXX_FLAGS "-std=c++17" )
 
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 
 add_executable(ShabbyRenderer src/main.cpp)

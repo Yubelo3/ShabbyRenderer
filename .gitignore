@@ -1,2 +1,4 @@
 # ignore build directory
+.vscode/
 build/
+./make.sh
