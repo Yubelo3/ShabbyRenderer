@@ -24,7 +24,7 @@ Camera initCamera(int w, int h)
 int main()
 {
     int w = 1024, h = 768;
-    ImageEncoder writer(w, h);
+    ImageEncoder writer(w, h, "../imout.ppm");
     Camera camera = initCamera(w, h);
     Scene scene;
     scene.setCamera(&camera);
