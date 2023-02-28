@@ -31,14 +31,14 @@ public:
             << _width << " " << _height << '\n'
             << 255 << '\n'; // Binary representation
 
-        unsigned long long offset = 0;
+        int offset = 0;
         for (int i = 0; i < _height; i++)
             for (int j = 0; j < _width; j++)
                 for (int k = 0; k < 3; k++)
                 {
-                    unsigned char value = *(float *)((data + offset)) * 255.999f;
+                    unsigned char value = *((float*)data + offset) * 255.999f;
                     ofs << value;
-                    offset += 4;
+                    offset += 1;
                 }
         ofs.close();
     }

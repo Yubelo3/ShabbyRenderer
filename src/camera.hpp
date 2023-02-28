@@ -1,8 +1,10 @@
 #pragma once
 #include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Dense>
 #include "ray.hpp"
 
 // Camera **with a film**
+// TODO: 用fov形式表示film
 class Camera
 {
     using Vec3 = Eigen::Vector3f;
@@ -11,14 +13,16 @@ private:
     // Camera intrinsics
     float _focal = 1.0f;
     float _aspectRatio = 16.0f / 9.0f;
-    float _width = 16.0f;
-    float _height = 9.0f;
 
     // Camera Extrinsics
     Vec3 _pos = Vec3{0.0f, 0.0f, 0.0f};
     Vec3 _up = Vec3{0.0f, 1.0f, 0.0f};
     Vec3 _lookAt = Vec3{0.0f, 0.0f, -1.0f};
     Vec3 _rightHand = Vec3{1.0f, 0.0f, 0.0f};
+
+    // Viewport parameters
+    float _width = 16.0f;
+    float _height = 9.0f;
 
     // Film parameters
     int _nHrozPix = 1024;
@@ -42,14 +46,17 @@ private:
     }
 
 public:
-    Camera();
+    Camera(){};
 
 public:
     Ray rayThroughFilm(int row, int col)
     {
         if (_recomputeFilmFlag)
+        {
             _recomputeFilm();
-        Vec3 pixCenter = _firstPixelCenter + col * _rightHand - row * _up;
+            _recomputeFilmFlag = false;
+        }
+        Vec3 pixCenter = _firstPixelCenter + col * _wPix * _rightHand - row * _hPix * _up;
         return Ray(_pos, pixCenter - _pos);
     }
 
@@ -82,7 +89,7 @@ public:
     {
         _up = up.normalized();
         _lookAt = lookAt.normalized();
-        _rightHand = _lookAt.cross3(_up);
+        _rightHand = _lookAt.cross(_up);
         _recomputeFilmFlag = true;
     }
     inline void setPosition(const Vec3 &pos)
@@ -95,5 +102,15 @@ public:
         _nHrozPix = nHorz;
         _nVertPix = nVert;
         _recomputeFilmFlag = true;
+    }
+
+    // parameter getters
+    inline int nHorzPix() const
+    {
+        return _nHrozPix;
+    }
+    inline int nVertPix() const
+    {
+        return _nVertPix;
     }
 };

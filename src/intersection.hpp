@@ -11,5 +11,4 @@ public:
     float t = INF;
     Vec3 normal = {1.0f, 0.0f, 0.0f};
     Vec3 color = {0.0f, 0.0f, 0.0f};
-
 };

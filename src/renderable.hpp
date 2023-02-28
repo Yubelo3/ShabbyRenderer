@@ -53,6 +53,7 @@ public:
         inter.happen = true;
         inter.t = t;
         inter.color = {0.5f, 0.6f, 0.7f};
+        inter.normal = (ray.orig() + t * d - _c).normalized();
         return inter;
     }
 
