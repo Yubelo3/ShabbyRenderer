@@ -1,12 +1,14 @@
 #include <iostream>
 #include <eigen3/Eigen/Core>
+#include "image_encoder.hpp"
+#include <cmath>
 
-using vec3 = Eigen::Vector3f;
+using Vec3 = Eigen::Vector3f;
 
 int main()
 {
-    vec3 a;
-    a<<1.,2.,3.;
-    std::cout<<a<<std::endl;
+    int h = 1024, w = 1024;
+    ImageEncoder writer(h, w);
+    writer.writeTest();
     return 0;
 }
