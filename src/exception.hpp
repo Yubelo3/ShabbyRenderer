@@ -1,3 +1,4 @@
+#pragma once
 #define RAISE_ERROR(x)                                     \
     {                                                     \
         printf("%s\n", x);                                  \

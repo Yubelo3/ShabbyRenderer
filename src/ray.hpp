@@ -1,3 +1,4 @@
+#pragma once
 #include <eigen3/Eigen/Core>
 
 
@@ -19,5 +20,15 @@ public:
     Vec3 operator()(float t) const
     {
         return _orig+t*_dir;
+    }
+
+public:
+    inline const Vec3& orig() const
+    {
+        return _orig;
+    }
+    inline const Vec3& dir() const
+    {
+        return _dir;
     }
 };
