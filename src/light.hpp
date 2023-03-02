@@ -39,7 +39,7 @@ private:
     Vec3 _intensity = {2.0f, 2.0f, 2.0f};
 
 public:
-    AmbientLight(const Vec3& intensity):_intensity(intensity){};
+    AmbientLight(const Vec3 &intensity) : _intensity(intensity){};
 
 public:
     void idAt(const Vec3 &pos, Vec3 &intensity, Vec3 &dir) const override
@@ -58,9 +58,12 @@ private:
     Vec3 _dir = {0.0f, 0.0f, -1.0f};
 
 public:
+    ParallelLight(const Vec3 &intensity, const Vec3 &dir) : _intensity(intensity), _dir(dir.normalized()){};
+
+public:
     void idAt(const Vec3 &pos, Vec3 &intensity, Vec3 &dir) const override
     {
         intensity = _intensity;
-        dir = _dir;
+        dir = -_dir;
     }
 };

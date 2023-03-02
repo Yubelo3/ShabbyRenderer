@@ -3,12 +3,19 @@
 #include "light.hpp"
 #include "material.hpp"
 #include "intersection.hpp"
+#include "ray.hpp"
+#include "callback_base.hpp"
+
+class Scene;
 
 class PhongShader
 {
     using Vec3 = Eigen::Vector3f;
     using LightPtr = std::shared_ptr<Light>;
     using MtlPtr = std::shared_ptr<Material>;
+
+private:
+    SceneBase* _scene=nullptr;
 
 public:
     PhongShader(){};
@@ -31,11 +38,16 @@ private:
     }
 
 public:
+    void bind(SceneBase* scene)
+    {
+        _scene=scene;
+    }
+
     Vec3 getColor(const std::vector<LightPtr> &lights, const Intersection &intersection) const
     {
-        Vec3 color = {0.0f, 0.0f, 0.0f};
-        Vec3 N = intersection.normal, V = intersection.viewDir;
         MtlPtr mtl = intersection.mtl;
+        Vec3 color = mtl->ke();
+        Vec3 N = intersection.normal, V = intersection.viewDir;
         Vec3 ka = mtl->ka(), kd = mtl->kd(), ks = mtl->ks();
         float p = mtl->ne();
         for (const LightPtr &light : lights)
@@ -47,6 +59,12 @@ public:
                 color += _ambient(ka, I);
             else
             {
+                Ray shadowRay(intersection.pos,L);
+                if(_scene->intersect(shadowRay).happen)
+                {
+                    continue;
+                }
+                
                 color += _diffuse(kd, I, N, L); // diffuse term
                 color += _specular(ks, I, N, L, V, p);
             }

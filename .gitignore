@@ -1,5 +1,6 @@
 # ignore build directory
 **/.vscode
 build/
-res/
 imout.ppm
+res/model/format.md
+res/model/texture.png

@@ -33,19 +33,16 @@ public:
             << 255 << '\n'; // Binary representation
 
         float *data = (float *)vData;
+        int offset=0;
         for (int i = 0; i < _height; i++)
-        {
-            int rowOffset = i * _width * 3;
-// #pragma omp parallel for num_threads(4)
             for (int j = 0; j < _width; j++)
                 for (int k = 0; k < 3; k++)
                 {
-                    int offset = rowOffset + j * 3 + k;
                     float value = std::clamp(*(data + offset), 0.0f, 1.0f);
                     unsigned char pValue = value * 255.999f;
                     ofs << pValue;
+                    offset++;
                 }
-        }
         ofs.close();
     }
 

@@ -4,6 +4,7 @@
 #include <eigen3/Eigen/Core>
 #include "material.hpp"
 #include <cmath>
+#include "utils.hpp"
 
 class Renderable
 {
@@ -50,9 +51,9 @@ public:
         float t;
         if (tMin > tMax)
             std::swap(tMin, tMax);
-        if (tMax < 0.0f)
+        if (tMax < EPS)
             return Intersection();
-        if (tMin < 0.0f)
+        if (tMin < EPS)
             t = tMax;
         else
             t = tMin;
