@@ -5,6 +5,7 @@
     {                                                  \
         printf("%s\n", x);                             \
         printf("%s:line %d: x\n", __FILE__, __LINE__); \
+        exit(-1);                                      \
     }
 
 const float INF = std::numeric_limits<float>::infinity();

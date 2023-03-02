@@ -5,6 +5,7 @@
 #include <fstream>
 #include "utils.hpp"
 #include <eigen3/Eigen/Core>
+#include <omp.h>
 
 class ImageEncoder
 {
@@ -19,9 +20,9 @@ public:
     ImageEncoder(int w, int h, const std::string &filepath = "imout.ppm") : _width(w), _height(h), _filepath(filepath){};
 
 public:
-    void write(const void *const data) const
+    void write(const void *const vData) const
     {
-        if (!data)
+        if (!vData)
             RAISE_ERROR("No data to write.");
         std::ofstream ofs(_filepath);
         if (!ofs.is_open())
@@ -31,15 +32,20 @@ public:
             << _width << " " << _height << '\n'
             << 255 << '\n'; // Binary representation
 
-        int offset = 0;
+        float *data = (float *)vData;
         for (int i = 0; i < _height; i++)
+        {
+            int rowOffset = i * _width * 3;
+// #pragma omp parallel for num_threads(4)
             for (int j = 0; j < _width; j++)
                 for (int k = 0; k < 3; k++)
                 {
-                    unsigned char value = *((float*)data + offset) * 255.999f;
-                    ofs << value;
-                    offset += 1;
+                    int offset = rowOffset + j * 3 + k;
+                    float value = std::clamp(*(data + offset), 0.0f, 1.0f);
+                    unsigned char pValue = value * 255.999f;
+                    ofs << pValue;
                 }
+        }
         ofs.close();
     }
 

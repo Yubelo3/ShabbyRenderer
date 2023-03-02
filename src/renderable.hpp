@@ -7,13 +7,19 @@
 
 class Renderable
 {
-private:
-    Material *_material = nullptr;
+    using MtlPtr = std::shared_ptr<Material>;
+
+protected:
+    MtlPtr _material = nullptr;
 
 public:
     Renderable(){};
 
 public:
+    void setMaterial(MtlPtr mtl)
+    {
+        _material = mtl;
+    }
     virtual Intersection intersect(Ray) const = 0;
     virtual void transform() = 0;
 };
@@ -21,6 +27,7 @@ public:
 class Shpere : public Renderable
 {
     using Vec3 = Eigen::Vector3f;
+    using MtlPtr = std::shared_ptr<Material>;
 
 private:
     Vec3 _c = {0.0f, 0.0f, -5.0f};
@@ -52,8 +59,13 @@ public:
         Intersection inter;
         inter.happen = true;
         inter.t = t;
-        inter.color = {0.5f, 0.6f, 0.7f};
-        inter.normal = (ray.orig() + t * d - _c).normalized();
+        inter.viewDir = -ray.dir();
+        inter.pos = ray.orig() + t * d;
+        inter.normal = (inter.pos - _c).normalized();
+        if (_material)
+            inter.mtl = _material;
+        else
+            inter.mtl = DEFAULT_MATERIAL;
         return inter;
     }
 

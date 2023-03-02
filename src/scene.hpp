@@ -6,25 +6,28 @@
 #include "config.h"
 #include <memory>
 #include <omp.h>
+#include "light.hpp"
+#include "shader.hpp"
 
 class Scene
 {
     using Vec3 = Eigen::Vector3f;
+    using ObjPtr=std::shared_ptr<Renderable>;
+    using LightPtr=std::shared_ptr<Light>;
+    using CameraPtr=std::shared_ptr<Camera>;
 
 private:
-    Camera *_camera;
-    std::vector<std::shared_ptr<Renderable>> _objs;
+    CameraPtr _camera=nullptr;
+    std::vector<ObjPtr> _objs;
+    std::vector<LightPtr> _lights;
     Vec3 *_frameBuffer = nullptr;
-
     //Ray-scene intersection callback
     //Can be implemented more efficient
     Intersection (Scene::*_intersect)(const Ray &ray) const = &Scene::trivialIntersect;
+    PhongShader shader;
 
 public:
-    Scene()
-    {
-        _camera = new Camera();
-    }
+    Scene(){};
     ~Scene()
     {
         delete[] _frameBuffer;
@@ -32,16 +35,20 @@ public:
 
 public:
     // TODO: 引用修正
-    void setCamera(Camera *camera)
+    void setCamera(CameraPtr camera)
     {
         _camera = camera;
         delete[] _frameBuffer;
         int bufferSize = (camera->nHorzPix()) * (camera->nVertPix());
         _frameBuffer = new Vec3[bufferSize];
     }
-    void addObject(std::shared_ptr<Renderable> renderable)
+    void addObject(ObjPtr renderable)
     {
         _objs.push_back(renderable);
+    }
+    void addLight(LightPtr light)
+    {
+        _lights.push_back(light);
     }
 
     // Intersection that can be optimized
@@ -70,7 +77,7 @@ public:
                 Ray ray = _camera->rayThroughFilm(i, j);
                 Intersection intersection = (this->*_intersect)(ray);
                 if (intersection.happen)
-                    _frameBuffer[bufferOffset] = intersection.normal.cwiseAbs(); // TODO: 颜色计算
+                    _frameBuffer[bufferOffset] = shader.getColor(_lights,intersection); // TODO: 颜色计算
                 else
                     _frameBuffer[bufferOffset] = BG_COLOR;
             }

@@ -1,4 +1,5 @@
 # ignore build directory
 **/.vscode
 build/
-./make.sh
+res/
+imout.ppm
