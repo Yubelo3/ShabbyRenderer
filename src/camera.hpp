@@ -12,7 +12,8 @@ class Camera
 private:
     // Camera intrinsics
     float _focal = 1.0f;
-    float _aspectRatio = 16.0f / 9.0f;
+    float _aspectRatio = 1024.f / 768.f;
+    float _hfov = degree2radian(100.0f);
 
     // Camera Extrinsics
     Vec3 _pos = Vec3{0.0f, 0.0f, 0.0f};
@@ -21,8 +22,9 @@ private:
     Vec3 _rightHand = Vec3{1.0f, 0.0f, 0.0f};
 
     // Viewport parameters
-    float _width = 16.0f;
-    float _height = 9.0f;
+    // Should not be changed directly
+    float _width = 0.0f;
+    float _height = 0.0f;
 
     // Film parameters
     int _nHrozPix = 1024;
@@ -65,6 +67,8 @@ public:
     inline void setFocal(float focal)
     {
         _focal = focal;
+        _width = 2.0f * _focal * tan(_hfov / 2.0f);
+        _height = _width / _aspectRatio;
         _recomputeFilmFlag = true;
     }
     inline void setAspectRatio(float aspectRatio)
@@ -73,16 +77,11 @@ public:
         _height = _width / aspectRatio;
         _recomputeFilmFlag = true;
     }
-    inline void setWidth(float width)
+    inline void setHFOV(float hfov)
     {
-        _width = width;
-        _aspectRatio = _width / _height;
-        _recomputeFilmFlag = true;
-    }
-    inline void setHeight(float height)
-    {
-        _height = height;
-        _aspectRatio = _width / _height;
+        _hfov = degree2radian(hfov);
+        _width = 2.0f * _focal * tan(_hfov / 2.0f);
+        _height = _width / _aspectRatio;
         _recomputeFilmFlag = true;
     }
     inline void setPose(const Vec3 &up, const Vec3 &lookAt)

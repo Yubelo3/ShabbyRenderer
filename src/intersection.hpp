@@ -1,6 +1,6 @@
 #pragma once
 #include <eigen3/Eigen/Core>
-#include "constant.h"
+#include "utils.hpp"
 
 class Intersection
 {

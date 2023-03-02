@@ -6,29 +6,31 @@
 #include "renderable.hpp"
 #include "camera.hpp"
 #include "scene.hpp"
+#include <memory>
+#include "config.h"
 
 using Vec3 = Eigen::Vector3f;
 
-Camera initCamera(int w, int h)
+Camera initCamera()
 {
     Camera camera;
-    camera.setFilm(w, h);
-    camera.setFocal(1.0f);
-    camera.setPosition({0.0f, 0.0f, 0.0f});
-    camera.setPose({0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, -1.0f});
-    camera.setWidth(2.0f);
-    camera.setHeight(1.5f);
+    camera.setFilm(FILM_WIDTH, FILM_HEIGHT);
+    camera.setFocal(CAMERA_FOCAL_LENGTH);
+    camera.setPosition(CAMERA_POS);
+    camera.setPose(CAMERA_UP, CAMERA_LOOKAT);
+    camera.setHFOV(CAMERA_HFOV);
+    camera.setAspectRatio(CAMERA_ASPECT_RATIO);
     return camera;
 }
 
 int main()
 {
-    int w = 1024, h = 768;
-    ImageEncoder writer(w, h, "../imout.ppm");
-    Camera camera = initCamera(w, h);
+    ImageEncoder writer(FILM_WIDTH, FILM_HEIGHT, "../imout.ppm");
+    Camera camera = initCamera();
     Scene scene;
     scene.setCamera(&camera);
-    scene.addObject(new Shpere({0.0f, 0.0f, -5.0f}, 1.0f));
+    scene.addObject(std::make_shared<Shpere>(Vec3{0.0f, 0.0f, -10.0f}, 1.0f));
+    scene.addObject(std::make_shared<Shpere>(Vec3{2.0f, 0.0f, -5.0f}, 1.0f));
     scene.render();
     writer.write(scene.frameBuffer());
     return 0;

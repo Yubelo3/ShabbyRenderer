@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <iostream>
 #include <fstream>
-#include "exception.hpp"
+#include "utils.hpp"
 #include <eigen3/Eigen/Core>
 
 class ImageEncoder

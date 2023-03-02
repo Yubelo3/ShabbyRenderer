@@ -4,6 +4,8 @@
 #include <vector>
 #include <eigen3/Eigen/Core>
 #include "config.h"
+#include <memory>
+#include <omp.h>
 
 class Scene
 {
@@ -11,8 +13,12 @@ class Scene
 
 private:
     Camera *_camera;
-    std::vector<Renderable *> _objs;
+    std::vector<std::shared_ptr<Renderable>> _objs;
     Vec3 *_frameBuffer = nullptr;
+
+    //Ray-scene intersection callback
+    //Can be implemented more efficient
+    Intersection (Scene::*_intersect)(const Ray &ray) const = &Scene::trivialIntersect;
 
 public:
     Scene()
@@ -33,29 +39,42 @@ public:
         int bufferSize = (camera->nHorzPix()) * (camera->nVertPix());
         _frameBuffer = new Vec3[bufferSize];
     }
-    void addObject(Renderable *renderable)
+    void addObject(std::shared_ptr<Renderable> renderable)
     {
         _objs.push_back(renderable);
+    }
+
+    // Intersection that can be optimized
+    Intersection trivialIntersect(const Ray &ray) const
+    {
+        Intersection ret;
+        for (const auto &obj : _objs)
+        {
+            Intersection intersection = obj->intersect(ray);
+            if (intersection.t < ret.t)
+                ret = intersection;
+        }
+        return ret;
     }
 
     void render() const
     {
         int w = _camera->nHorzPix(), h = _camera->nVertPix();
-        int bufferOffset = 0;
         for (int i = 0; i < h; i++)
+        {
+            int rowOffset = i * w;
+#pragma omp parallel for num_threads(4)
             for (int j = 0; j < w; j++)
             {
+                int bufferOffset = rowOffset + j;
                 Ray ray = _camera->rayThroughFilm(i, j);
-                for (const Renderable *obj : _objs)
-                {
-                    Intersection itsct = obj->intersect(ray);
-                    if (itsct.happen)
-                        _frameBuffer[bufferOffset] = itsct.normal.cwiseAbs(); // TODO: 颜色计算
-                    else
-                        _frameBuffer[bufferOffset] = BG_COLOR;
-                }
-                bufferOffset++;
+                Intersection intersection = (this->*_intersect)(ray);
+                if (intersection.happen)
+                    _frameBuffer[bufferOffset] = intersection.normal.cwiseAbs(); // TODO: 颜色计算
+                else
+                    _frameBuffer[bufferOffset] = BG_COLOR;
             }
+        }
     }
     Vec3 *frameBuffer() const
     {
