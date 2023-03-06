@@ -2,6 +2,7 @@
 #include <eigen3/Eigen/Core>
 
 #define MULTI_THREAD
+#define NUM_THREADS 6
 
 const Eigen::Vector3f BG_COLOR = {0.27f, 0.4f, 0.65f};
 const Eigen::Vector3f CAMERA_POS = {0.0f, 5.0f, 10.0f};
@@ -16,4 +17,4 @@ const float CAMERA_FOCAL_LENGTH = 1.0f;
 const float CAMERA_HFOV = 60.0f;
 // const float CAMERA_HFOV = 90.0f;
 const float CAMERA_ASPECT_RATIO = (float)FILM_WIDTH / FILM_HEIGHT;
-const int NUM_SCATTER=1;
+const int NUM_SCATTER = 1;

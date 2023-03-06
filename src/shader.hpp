@@ -96,45 +96,45 @@ public:
     }
 };
 
-class BounceShader : public Shader
-{
-    using Vec3 = Eigen::Vector3f;
-    using LightPtr = std::shared_ptr<Light>;
-    using MtlPtr = std::shared_ptr<Material>;
+// class BounceShader : public Shader
+// {
+//     using Vec3 = Eigen::Vector3f;
+//     using LightPtr = std::shared_ptr<Light>;
+//     using MtlPtr = std::shared_ptr<Material>;
 
-public:
-    BounceShader(){};
+// public:
+//     BounceShader(){};
 
-private:
-    inline Vec3 _sampleUnitShpere() const
-    {
-        Vec3 ret = Vec3::Random();
-        while (ret[0] * ret[0] + ret[1] * ret[1] + ret[2] * ret[2] > 1.0f)
-            ret = Vec3::Random();
-        return ret;
-    }
-    Ray _constructBounce(const Vec3 &pos, const Vec3 &N) const
-    {
-        Vec3 dst = pos + N + _sampleUnitShpere();
-        return Ray(pos, dst - pos);
-    }
-    Vec3 _getColor(const std::vector<LightPtr> &lights, const Intersection &intersection, int depth) const
-    {
-        if (depth <= 0)
-            return Vec3::Zero();
-        float r = intersection.pos.norm();
-        Ray bounceRay = _constructBounce(intersection.pos, intersection.normal);
-        Intersection bounceIntersection = _scene->intersect(bounceRay);
-        if (bounceIntersection.happen)
-            return 0.5 * _getColor(lights, bounceIntersection, depth - 1);
+// private:
+//     inline Vec3 _sampleUnitShpere() const
+//     {
+//         Vec3 ret = Vec3::Random();
+//         while (ret[0] * ret[0] + ret[1] * ret[1] + ret[2] * ret[2] > 1.0f)
+//             ret = Vec3::Random();
+//         return ret;
+//     }
+//     Ray _constructBounce(const Vec3 &pos, const Vec3 &N) const
+//     {
+//         Vec3 dst = pos + N + _sampleUnitShpere();
+//         return Ray(pos, dst - pos);
+//     }
+//     Vec3 _getColor(const std::vector<LightPtr> &lights, const Intersection &intersection, int depth) const
+//     {
+//         if (depth <= 0)
+//             return Vec3::Zero();
+//         float r = intersection.pos.norm();
+//         Ray bounceRay = _constructBounce(intersection.pos, intersection.normal);
+//         Intersection bounceIntersection = _scene->intersect(bounceRay);
+//         if (bounceIntersection.happen)
+//             return 0.5 * _getColor(lights, bounceIntersection, depth - 1);
 
-        float t = 0.5 * (bounceRay.dir()[1] + 1.0);
-        return (1.0f - t) * Vec3::Ones() + t * Vec3{0.3f, 0.5f, 0.5f};
-    }
+//         float t = 0.5 * (bounceRay.dir()[1] + 1.0);
+//         return (1.0f - t) * Vec3::Ones() + t * Vec3{0.3f, 0.5f, 0.5f};
+//     }
 
-public:
-    Vec3 getColor(const Intersection &intersection) const override
-    {
-        return _getColor(_scene->lights(), intersection, 50);
-    }
-};
+// public:
+//     Vec3 getColor(const Intersection &intersection) const override
+//     {
+//         return _getColor(_scene->lights(), intersection, 50);
+//     }
+// };

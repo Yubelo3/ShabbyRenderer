@@ -80,7 +80,7 @@ public:
         {
             int rowOffset = i * w;
 #ifdef MULTI_THREAD
-#pragma omp parallel for num_threads(4)
+#pragma omp parallel for num_threads(NUM_THREADS)
 #endif
             for (int j = 0; j < w; j++)
             {
