@@ -12,7 +12,7 @@ const float INF = std::numeric_limits<float>::infinity();
 
 const float PI = 3.1415926;
 
-const float EPS = 1e-3f;
+const float EPS = 1e-2f;
 
 inline float degree2radian(float d)
 {

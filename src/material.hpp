@@ -13,7 +13,8 @@ private:
     Vec3 _ka = {1.0f, 1.0f, 1.0f};
     Vec3 _kd = {1.0f, 1.0f, 1.0f};
     Vec3 _ks = {1.0f, 1.0f, 1.0f};
-    Vec3 _ke = {0.0f, 0.0f, 0.0f};
+    Vec3 _ke = Vec3::Zero(); // emitting
+    Vec3 _km = Vec3::Zero(); // reflection
     float _ne = 100.0f;
     std::shared_ptr<Texture> _texture = nullptr;
 
@@ -42,6 +43,10 @@ public:
     {
         return _ke;
     }
+    inline const Vec3 &km() const
+    {
+        return _km;
+    }
     inline float ne() const
     {
         return _ne;
@@ -66,6 +71,10 @@ public:
     {
         _ke = ke;
     }
+    void setKm(const Vec3 &km)
+    {
+        _km = km;
+    }
     void setNe(float ne)
     {
         _ne = ne;
@@ -76,4 +85,4 @@ public:
     }
 };
 
-std::shared_ptr<Material> DEFAULT_MATERIAL=std::make_shared<Material>();
+std::shared_ptr<Material> DEFAULT_MATERIAL = std::make_shared<Material>();

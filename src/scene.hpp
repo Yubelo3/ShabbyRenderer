@@ -79,14 +79,16 @@ public:
         for (int i = 0; i < h; i++)
         {
             int rowOffset = i * w;
+#ifdef MULTI_THREAD
 #pragma omp parallel for num_threads(4)
+#endif
             for (int j = 0; j < w; j++)
             {
                 int bufferOffset = rowOffset + j;
                 Ray ray = _camera->rayThroughFilm(i, j);
                 Intersection intersection = (this->*_intersect)(ray);
                 if (intersection.happen)
-                    _frameBuffer[bufferOffset] = shader.getColor(_lights, intersection); // TODO: 颜色计算
+                    _frameBuffer[bufferOffset] = shader.getColor(intersection); // TODO: 颜色计算
                 else
                     _frameBuffer[bufferOffset] = BG_COLOR;
             }
@@ -95,5 +97,11 @@ public:
     Vec3 *frameBuffer() const
     {
         return _frameBuffer;
+    }
+
+public:
+    const std::vector<LightPtr> &lights() const
+    {
+        return _lights;
     }
 };

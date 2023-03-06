@@ -1,21 +1,38 @@
 #pragma once
 #include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Dense>
 #include "light.hpp"
 #include "material.hpp"
 #include "intersection.hpp"
 #include "ray.hpp"
 #include "callback_base.hpp"
+#include "config.h"
 
 class Scene;
 
-class PhongShader
+class Shader
 {
     using Vec3 = Eigen::Vector3f;
     using LightPtr = std::shared_ptr<Light>;
     using MtlPtr = std::shared_ptr<Material>;
 
-private:
-    SceneBase* _scene=nullptr;
+protected:
+    SceneBase *_scene = nullptr;
+
+public:
+    void bind(SceneBase *scene)
+    {
+        _scene = scene;
+    }
+
+    virtual Vec3 getColor(const Intersection &) const = 0;
+};
+
+class PhongShader : public Shader
+{
+    using Vec3 = Eigen::Vector3f;
+    using LightPtr = std::shared_ptr<Light>;
+    using MtlPtr = std::shared_ptr<Material>;
 
 public:
     PhongShader(){};
@@ -38,13 +55,9 @@ private:
     }
 
 public:
-    void bind(SceneBase* scene)
+    Vec3 getColor(const Intersection &intersection) const override
     {
-        _scene=scene;
-    }
-
-    Vec3 getColor(const std::vector<LightPtr> &lights, const Intersection &intersection) const
-    {
+        const std::vector<LightPtr> &lights = _scene->lights();
         MtlPtr mtl = intersection.mtl;
         Vec3 color = mtl->ke();
         Vec3 N = intersection.normal, V = intersection.viewDir;
@@ -59,16 +72,69 @@ public:
                 color += _ambient(ka, I);
             else
             {
-                Ray shadowRay(intersection.pos,L);
-                if(_scene->intersect(shadowRay).happen)
-                {
+                Ray shadowRay(intersection.pos, L);
+                if (_scene->intersect(shadowRay).happen)
                     continue;
-                }
-                
+
                 color += _diffuse(kd, I, N, L); // diffuse term
                 color += _specular(ks, I, N, L, V, p);
             }
         }
+
+        // Recursive appears if reflection happen
+        if (mtl->km().maxCoeff()>0.01f)
+        {
+            float cosTheta = N.dot(V);
+            Vec3 R = 2.0f * cosTheta * N - V;
+            Ray reflectRay(intersection.pos, R);
+            Intersection reflectIntersection = _scene->intersect(reflectRay);
+            if (reflectIntersection.happen)
+                color += mtl->km().cwiseProduct(getColor(reflectIntersection));
+        }
+
         return color;
+    }
+};
+
+class BounceShader : public Shader
+{
+    using Vec3 = Eigen::Vector3f;
+    using LightPtr = std::shared_ptr<Light>;
+    using MtlPtr = std::shared_ptr<Material>;
+
+public:
+    BounceShader(){};
+
+private:
+    inline Vec3 _sampleUnitShpere() const
+    {
+        Vec3 ret = Vec3::Random();
+        while (ret[0] * ret[0] + ret[1] * ret[1] + ret[2] * ret[2] > 1.0f)
+            ret = Vec3::Random();
+        return ret;
+    }
+    Ray _constructBounce(const Vec3 &pos, const Vec3 &N) const
+    {
+        Vec3 dst = pos + N + _sampleUnitShpere();
+        return Ray(pos, dst - pos);
+    }
+    Vec3 _getColor(const std::vector<LightPtr> &lights, const Intersection &intersection, int depth) const
+    {
+        if (depth <= 0)
+            return Vec3::Zero();
+        float r = intersection.pos.norm();
+        Ray bounceRay = _constructBounce(intersection.pos, intersection.normal);
+        Intersection bounceIntersection = _scene->intersect(bounceRay);
+        if (bounceIntersection.happen)
+            return 0.5 * _getColor(lights, bounceIntersection, depth - 1);
+
+        float t = 0.5 * (bounceRay.dir()[1] + 1.0);
+        return (1.0f - t) * Vec3::Ones() + t * Vec3{0.3f, 0.5f, 0.5f};
+    }
+
+public:
+    Vec3 getColor(const Intersection &intersection) const override
+    {
+        return _getColor(_scene->lights(), intersection, 50);
     }
 };

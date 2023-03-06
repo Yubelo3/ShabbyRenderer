@@ -38,7 +38,7 @@ public:
             for (int j = 0; j < _width; j++)
                 for (int k = 0; k < 3; k++)
                 {
-                    float value = std::clamp(*(data + offset), 0.0f, 1.0f);
+                    float value = sqrt(std::clamp(*(data + offset), 0.0f, 1.0f));
                     unsigned char pValue = value * 255.999f;
                     ofs << pValue;
                     offset++;
