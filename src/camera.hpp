@@ -9,7 +9,7 @@ class Camera
 {
     using Vec3 = Eigen::Vector3f;
 
-private:
+protected:
     // Camera intrinsics
     float _focal = 1.0f;
     float _aspectRatio = 1024.f / 768.f;
@@ -36,7 +36,7 @@ private:
     float _wPix; // width per pixel
     float _hPix; // height per pixel
 
-private:
+protected:
     void _recomputeFilm()
     {
         _wPix = _width / _nHrozPix;
@@ -51,16 +51,7 @@ public:
     Camera(){};
 
 public:
-    Ray rayThroughFilm(int row, int col)
-    {
-        if (_recomputeFilmFlag)
-        {
-            _recomputeFilm();
-            _recomputeFilmFlag = false;
-        }
-        Vec3 pixCenter = _firstPixelCenter + col * _wPix * _rightHand - row * _hPix * _up;
-        return Ray(_pos, pixCenter - _pos);
-    }
+    virtual Ray rayThroughFilm(int row, int col) = 0;
 
     // parameter setters
 public:
@@ -86,6 +77,8 @@ public:
     }
     inline void setPose(const Vec3 &up, const Vec3 &lookAt)
     {
+        if(std::abs(up.dot(lookAt))>EPS)
+            RAISE_ERROR("Illegal pose");
         _up = up.normalized();
         _lookAt = lookAt.normalized();
         _rightHand = _lookAt.cross(_up);
@@ -111,5 +104,39 @@ public:
     inline int nVertPix() const
     {
         return _nVertPix;
+    }
+};
+
+class PerspectiveCamera : public Camera
+{
+    using Vec3 = Eigen::Vector3f;
+
+public:
+    Ray rayThroughFilm(int row, int col)
+    {
+        if (_recomputeFilmFlag)
+        {
+            _recomputeFilm();
+            _recomputeFilmFlag = false;
+        }
+        Vec3 pixCenter = _firstPixelCenter + col * _wPix * _rightHand - row * _hPix * _up;
+        return Ray(_pos, pixCenter - _pos);
+    }
+};
+
+class OrthogonalCamera : public Camera
+{
+    using Vec3 = Eigen::Vector3f;
+
+public:
+    Ray rayThroughFilm(int row, int col)
+    {
+        if (_recomputeFilmFlag)
+        {
+            _recomputeFilm();
+            _recomputeFilmFlag = false;
+        }
+        Vec3 pixCenter = _firstPixelCenter + col * _wPix * _rightHand - row * _hPix * _up;
+        return Ray(pixCenter - _focal * _lookAt, _lookAt);
     }
 };

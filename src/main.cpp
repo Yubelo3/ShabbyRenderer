@@ -18,7 +18,7 @@ using MtlPtr = std::shared_ptr<Material>;
 
 CameraPtr initCamera()
 {
-    CameraPtr camera = std::make_shared<Camera>();
+    CameraPtr camera = std::make_shared<PerspectiveCamera>();
     camera->setFilm(FILM_WIDTH, FILM_HEIGHT);
     camera->setFocal(CAMERA_FOCAL_LENGTH);
     camera->setPosition(CAMERA_POS);
@@ -41,7 +41,7 @@ void sceneRener()
     ObjPtr sphere3 = std::make_shared<Shpere>(Vec3{2.0f, 2.0f, -10.0f}, 1.0f);
     ObjPtr sphere4 = std::make_shared<Shpere>(Vec3{-2.0f, -2.0f, -10.0f}, 2.0f);
     ObjPtr sphere5 = std::make_shared<Shpere>(Vec3{-0.0f, -51.0f, -10.0f}, 45.0f);
-    mtlLoader.materials()[3]->setKm(mtlLoader.materials()[3]->ks()*2.0f);
+    mtlLoader.materials()[3]->setKm(mtlLoader.materials()[3]->ks() * 2.0f);
     sphere1->setMaterial(mtlLoader.materials()[0]);
     sphere2->setMaterial(mtlLoader.materials()[1]);
     sphere3->setMaterial(mtlLoader.materials()[2]);

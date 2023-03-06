@@ -33,12 +33,15 @@ public:
             << 255 << '\n'; // Binary representation
 
         float *data = (float *)vData;
-        int offset=0;
+        int offset = 0;
         for (int i = 0; i < _height; i++)
             for (int j = 0; j < _width; j++)
                 for (int k = 0; k < 3; k++)
                 {
-                    float value = sqrt(std::clamp(*(data + offset), 0.0f, 1.0f));
+                    float value = std::clamp(*(data + offset), 0.0f, 1.0f);
+                    // gamma矫正
+                    value = pow(value, 1.0f / 2.2f);
+
                     unsigned char pValue = value * 255.999f;
                     ofs << pValue;
                     offset++;
