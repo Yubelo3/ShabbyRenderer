@@ -10,6 +10,7 @@
 #include "config.h"
 #include "mtl_loader.hpp"
 #include <ctime>
+#include "obj_loader.hpp"
 
 using Vec3 = Eigen::Vector3f;
 using Mat3 = Eigen::Matrix3f;
@@ -17,6 +18,7 @@ using ObjPtr = std::shared_ptr<Renderable>;
 using CameraPtr = std::shared_ptr<Camera>;
 using LightPtr = std::shared_ptr<Light>;
 using MtlPtr = std::shared_ptr<Material>;
+using MeshPtr = std::shared_ptr<Mesh>;
 
 CameraPtr initCamera()
 {
@@ -87,6 +89,32 @@ void setSceneTriangle(Scene &scene)
     scene.addLight(light3);
 }
 
+void setSceneMesh(Scene &scene)
+{
+    MtlLoader mtlLoader("../res/model/model.mtl");
+    mtlLoader.materials()[3]->setKm(mtlLoader.materials()[3]->ks() * 2.0f);
+
+    ObjLoader loader;
+    ObjPtr tri = loader.load("../res/model/raw_model.obj");
+    ObjPtr sphere1 = std::make_shared<Shpere>(Vec3{4.0f, -2.0f, -8.0f}, 1.0f);
+    ObjPtr sphere5 = std::make_shared<Shpere>(Vec3{-0.0f, -48.0f, -10.0f}, 45.0f);
+    
+    tri->setMaterial(mtlLoader.materials()[3]);
+    sphere1->setMaterial(mtlLoader.materials()[3]);
+    sphere5->setMaterial(mtlLoader.materials()[3]);
+
+    scene.addObject(tri);
+    scene.addObject(sphere1);
+    scene.addObject(sphere5);
+
+    LightPtr light1 = std::make_shared<PointLight>(Vec3{23.0f, 23.0f, 23.0f}, Vec3{0.0f, 0.0f, 10.0f});
+    LightPtr light2 = std::make_shared<AmbientLight>(Vec3{0.25f, 0.25f, 0.25f});
+    LightPtr light3 = std::make_shared<ParallelLight>(BG_COLOR * 0.5f, Vec3{0.0f, -1.0f, 0.0f});
+    scene.addLight(light1);
+    scene.addLight(light2);
+    scene.addLight(light3);
+}
+
 void renderScene(void (*setter)(Scene &))
 {
     ImageEncoder writer(FILM_WIDTH, FILM_HEIGHT, "../imout.ppm");
@@ -102,10 +130,8 @@ void renderScene(void (*setter)(Scene &))
 
 int main()
 {
-    // clock_t startTime = clock(), endTime;
-    renderScene(setSceneTriangle);
+    renderScene(setSceneMesh);
+    // renderScene(setSceneSphere);
 
-    // endTime = clock();
-    // std::cout << "Rendering finished in " << (endTime - startTime) / CLOCKS_PER_SEC << " s" << std::endl;
     return 0;
 }

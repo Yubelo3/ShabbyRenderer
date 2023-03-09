@@ -19,6 +19,7 @@ private:
     std::shared_ptr<Texture> _texture = nullptr;
 
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
     Material(){};
     Material(const std::string &name, const Vec3 &ka, const Vec3 &kd, const Vec3 &ks) : _name(name), _ka(ka), _kd(kd), _ks(ks){};
 

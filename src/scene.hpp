@@ -28,6 +28,7 @@ private:
     PhongShader shader;
 
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     Scene()
     {
         shader.bind(this);
@@ -78,9 +79,10 @@ public:
         int w = _camera->nHorzPix(), h = _camera->nVertPix();
         for (int i = 0; i < h; i++)
         {
+            printf("%d/%d\n", i, h);
             int rowOffset = i * w;
 #ifdef MULTI_THREAD
-#pragma omp parallel for num_threads(NUM_THREADS)
+#pragma omp parallel for schedule(dynamic, NUM_THREADS)
 #endif
             for (int j = 0; j < w; j++)
             {

@@ -20,12 +20,13 @@ protected:
     SceneBase *_scene = nullptr;
 
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
     void bind(SceneBase *scene)
     {
         _scene = scene;
     }
 
-    virtual Vec3 getColor(const Intersection &) const = 0;
+    virtual Vec3 getColor(const Intersection &, int depth = 0) const = 0;
 };
 
 class PhongShader : public Shader
@@ -55,7 +56,7 @@ private:
     }
 
 public:
-    Vec3 getColor(const Intersection &intersection) const override
+    Vec3 getColor(const Intersection &intersection, int depth = 0) const override
     {
         const std::vector<LightPtr> &lights = _scene->lights();
         MtlPtr mtl = intersection.mtl;
@@ -81,15 +82,14 @@ public:
             }
         }
 
-        // Recursive appears if reflection happen
-        if (mtl->km().maxCoeff()>0.01f)
+        if (depth < MAX_BOUNCE && mtl->km().maxCoeff() > 0.01f)
         {
             float cosTheta = N.dot(V);
             Vec3 R = 2.0f * cosTheta * N - V;
             Ray reflectRay(intersection.pos, R);
             Intersection reflectIntersection = _scene->intersect(reflectRay);
             if (reflectIntersection.happen)
-                color += mtl->km().cwiseProduct(getColor(reflectIntersection));
+                color += mtl->km().cwiseProduct(getColor(reflectIntersection, depth + 1));
         }
 
         return color;
