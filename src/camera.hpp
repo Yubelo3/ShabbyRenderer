@@ -2,6 +2,7 @@
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
 #include "ray.hpp"
+#include "utils.hpp"
 
 // Camera **with a film**
 // TODO: 用fov形式表示film
@@ -51,7 +52,7 @@ public:
     Camera(){};
 
 public:
-    virtual Ray rayThroughFilm(int row, int col) = 0;
+    virtual Ray rayThroughFilm(float row, float col) = 0;
 
     // parameter setters
 public:
@@ -112,7 +113,7 @@ class PerspectiveCamera : public Camera
     using Vec3 = Eigen::Vector3f;
 
 public:
-    Ray rayThroughFilm(int row, int col)
+    Ray rayThroughFilm(float row, float col)
     {
         if (_recomputeFilmFlag)
         {
@@ -129,7 +130,7 @@ class OrthogonalCamera : public Camera
     using Vec3 = Eigen::Vector3f;
 
 public:
-    Ray rayThroughFilm(int row, int col)
+    Ray rayThroughFilm(float row, float col)
     {
         if (_recomputeFilmFlag)
         {

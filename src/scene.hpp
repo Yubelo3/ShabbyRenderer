@@ -9,6 +9,7 @@
 #include "light.hpp"
 #include "shader.hpp"
 #include "callback_base.hpp"
+#include "easy_random.hpp"
 
 class Scene : public SceneBase
 {
@@ -28,7 +29,6 @@ private:
     PhongShader shader;
 
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     Scene()
     {
         shader.bind(this);
@@ -76,7 +76,10 @@ public:
 
     void render() const
     {
+        float pixXOffset[] = {-0.25, -0.25, 0.25, 0.25};
+        float pixYOffset[] = {-0.25, 0.25, -0.25, 0.25};
         int w = _camera->nHorzPix(), h = _camera->nVertPix();
+        std::uniform_real_distribution<float> distrib(-0.25, 0.25);
         for (int i = 0; i < h; i++)
         {
             printf("%d/%d\n", i, h);
@@ -87,12 +90,19 @@ public:
             for (int j = 0; j < w; j++)
             {
                 int bufferOffset = rowOffset + j;
-                Ray ray = _camera->rayThroughFilm(i, j);
-                Intersection intersection = (this->*_intersect)(ray);
-                if (intersection.happen)
-                    _frameBuffer[bufferOffset] = shader.getColor(intersection); // TODO: 颜色计算
-                else
-                    _frameBuffer[bufferOffset] = BG_COLOR;
+                Vec3 color = Vec3::Zero();
+                for (int s = 0; s < 4; s++)
+                {
+                    float a = i + pixXOffset[s] + easyUniform() * 0.25;
+                    float b = j + pixYOffset[s] + easyUniform() * 0.25;
+                    Ray ray = _camera->rayThroughFilm(a, b);
+                    Intersection intersection = (this->*_intersect)(ray);
+                    if (intersection.happen)
+                        color += shader.getColor(intersection); // TODO: 颜色计算
+                    else
+                        color += BG_COLOR;
+                }
+                _frameBuffer[bufferOffset] = color / 4.0f;
             }
         }
     }

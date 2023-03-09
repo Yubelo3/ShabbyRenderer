@@ -20,7 +20,6 @@ private:
     std::vector<Vec2> _vt; // vertex uv
     std::vector<Vec3> _vn; // vertex normal
     std::vector<IVec3> _vi; // faces index
-    std::vector<Vec3> _fn;  // face normal(compute if no vn information)
     std::vector<IVec3> _vti; // uv index
     std::vector<IVec3> _vni; // normal index
 

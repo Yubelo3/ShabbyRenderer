@@ -11,6 +11,7 @@
 #include "mtl_loader.hpp"
 #include <ctime>
 #include "obj_loader.hpp"
+#include "easy_random.hpp"
 
 using Vec3 = Eigen::Vector3f;
 using Mat3 = Eigen::Matrix3f;
@@ -95,7 +96,7 @@ void setSceneMesh(Scene &scene)
     mtlLoader.materials()[3]->setKm(mtlLoader.materials()[3]->ks() * 2.0f);
 
     ObjLoader loader;
-    ObjPtr tri = loader.load("../res/model/raw_model.obj");
+    ObjPtr tri = loader.load("../res/model/teapot.obj");
     ObjPtr sphere1 = std::make_shared<Shpere>(Vec3{4.0f, -2.0f, -8.0f}, 1.0f);
     ObjPtr sphere5 = std::make_shared<Shpere>(Vec3{-0.0f, -48.0f, -10.0f}, 45.0f);
     
@@ -130,8 +131,8 @@ void renderScene(void (*setter)(Scene &))
 
 int main()
 {
-    renderScene(setSceneMesh);
-    // renderScene(setSceneSphere);
+    // renderScene(setSceneMesh);
+    renderScene(setSceneSphere);
 
     return 0;
 }

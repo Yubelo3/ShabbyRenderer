@@ -7,13 +7,13 @@
 // const Eigen::Vector3f CAMERA_POS = {0.0f, 0.0f, 10.0f};
 // const Eigen::Vector3f CAMERA_LOOKAT = {0.0f, 0.0f, -1.0f};
 
-const Eigen::Vector3f CAMERA_POS = {0.0f, 0.0f, 5.0f};
-const Eigen::Vector3f CAMERA_LOOKAT = {0.0f, 0.0f, -1.0f};
-const Eigen::Vector3f CAMERA_UP = {0.0f, 1.0f, 0.0f};
-
 // const Eigen::Vector3f CAMERA_POS = {0.0f, 0.0f, 5.0f};
-// const Eigen::Vector3f CAMERA_LOOKAT = {0.0f, -0.5f, -1.0f};
-// const Eigen::Vector3f CAMERA_UP = {0.0f, 1.0f, -0.5f};
+// const Eigen::Vector3f CAMERA_LOOKAT = {0.0f, 0.0f, -1.0f};
+// const Eigen::Vector3f CAMERA_UP = {0.0f, 1.0f, 0.0f};
+
+const Eigen::Vector3f CAMERA_POS = {0.0f, 5.0f, 10.0f};
+const Eigen::Vector3f CAMERA_LOOKAT = {0.0f, -0.5f, -1.0f};
+const Eigen::Vector3f CAMERA_UP = {0.0f, 1.0f, -0.5f};
 
 const Eigen::Vector3f BG_COLOR = {0.27f, 0.4f, 0.65f};
 const int FILM_HEIGHT = 768;
