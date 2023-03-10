@@ -17,7 +17,7 @@ This repository contains a trivial implementation of pure-CPU ray tracer, which 
 
 1. Get Eigen3  
 Eigen is a C++ template library for linear algebra: matrices, vectors, numerical solvers, and related algorithms.  
-You can also refer Eigen's official page( http://eigen.tuxfamily.org/index.php?title=Main_Page) if you want to build Eigen on your own.  
+You can also refer Eigen's official page( http://eigen.tuxfamily.org/) if you want to build Eigen on your own.  
 ```bash  
 # For Ubuntu
 sudo apt update
