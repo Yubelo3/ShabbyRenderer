@@ -137,12 +137,19 @@ public:
                 color += _ambient(ka, I);
             else
             {
+                double at=1.0;
                 Ray shadowRay(intersection.pos, L);
-                if (_scene->intersect(shadowRay).happen)
-                    continue;
+                Intersection shadowInter=_scene->intersect(shadowRay);
+                if (shadowInter.happen)
+                {
+                    if(shadowInter.mtl->kf()>1.0)
+                        at/=pow(shadowInter.mtl->kf(),0.8);
+                    else
+                        continue;
+                }
 
-                color += _diffuse(kd, I, N, L); // diffuse term
-                color += _specular(ks, I, N, L, V, p);
+                color += at*_diffuse(kd, I, N, L); // diffuse term
+                color += at*_specular(ks, I, N, L, V, p);
             }
         }
 

@@ -1,10 +1,17 @@
 # ShabbyRenderer  
 
+![avatar](img/preview.png)
+
 This repository contains a trivial implementation of pure-CPU ray tracer, which supports some basic features: 
 * Simple loaders for materials and triangular-meshes    
 * Anti-aliasing(via stratified sampling)  
+* Texture mapping
 * Transparent material  
 * Ideal mirror reflection  
+* Hard shadow
+* Parallel rendering(using openMP)
+* Orthogonal camera & perspective camera
+* Parallel lighting
 
 ## How To Build  
 
