@@ -94,19 +94,25 @@ private:
         double g = exp(inter.t * log(kg));
         double b = exp(inter.t * log(kb));
         Vec3 attenuate{r, g, b};
+        if (attenuate.maxCoeff() < 0.05)
+            return Vec3::Zero();
         Vec3 refractDir = _refractDir(-ray.dir(), inter.normal, n, 1.0);
-        if (refractDir.isZero())
-        {
-            Vec3 reflectDir = _reflectDir(-ray.dir(), inter.normal);
-            Ray reflectRay(inter.pos, reflectDir);
-            return _getInternalReflection(reflectRay, depth + 1).cwiseProduct(attenuate);
-        }
+
+        // refraction+reflection
+        double nReflect = _schlickApproxim(refractDir, -inter.normal, n);
+        double nRefract = 1.0 - nReflect;
+        Vec3 reflectDir = _reflectDir(-ray.dir(), inter.normal);
+        Ray reflectRay(inter.pos, reflectDir);
+        Vec3 reflection = _getInternalReflection(reflectRay, depth + 1).cwiseProduct(attenuate);
+        if (refractDir.isZero()) // total internal reflection
+            return reflection.cwiseProduct(attenuate);
+
         Ray refractRay(inter.pos, refractDir);
         Intersection outInter = _scene->intersect(refractRay);
-        if(outInter.happen)
-            return getColor(outInter, depth + 1).cwiseProduct(attenuate);
+        if (outInter.happen)
+            return (nRefract * getColor(outInter, depth + 1) + nReflect * reflection).cwiseProduct(attenuate);
         else
-            return BG_COLOR.cwiseProduct(attenuate);
+            return (BG_COLOR + nReflect * reflection).cwiseProduct(attenuate);
     }
 
 public:
@@ -117,7 +123,11 @@ public:
         Vec3 color = mtl->ke();
         Vec3 N = intersection.normal, V = intersection.viewDir;
         Vec3 ka = mtl->ka(), kd = mtl->kd(), ks = mtl->ks();
+        if(intersection.texColor)
+            kd=*intersection.texColor;
         double p = mtl->ne();
+
+        //local illumination model
         for (const LightPtr &light : lights)
         {
             Vec3 I, L;
@@ -136,6 +146,7 @@ public:
             }
         }
 
+        //manage reflection and refraction
         if (depth < MAX_BOUNCE)
         {
             if (mtl->km().maxCoeff() > 0.01) // ideal relection material
@@ -161,7 +172,7 @@ public:
                 // compute refraction
                 Vec3 refractDir = _refractDir(V, N, 1.0, mtl->kf());
                 Ray refractRay(intersection.pos, refractDir);
-                color += nRefract * _getInternalReflection(refractRay,depth+1);
+                color += nRefract * _getInternalReflection(refractRay, depth + 1);
             }
         }
 

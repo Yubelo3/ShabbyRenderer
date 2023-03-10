@@ -25,7 +25,6 @@ private:
     Vec3 *_frameBuffer = nullptr;
     // Ray-scene intersection callback
     // Can be implemented more efficient
-    Intersection (Scene::*_intersect)(const Ray &ray) const = &Scene::trivialIntersect;
     PhongShader shader;
 
 public:
@@ -56,8 +55,7 @@ public:
         _lights.push_back(light);
     }
 
-    // Intersection callback
-    Intersection trivialIntersect(const Ray &ray) const
+    Intersection intersect(const Ray &ray) const
     {
         Intersection ret;
         for (const auto &obj : _objs)
@@ -67,11 +65,6 @@ public:
                 ret = intersection;
         }
         return ret;
-    }
-
-    Intersection intersect(const Ray &ray) const
-    {
-        return (this->*_intersect)(ray);
     }
 
     void render() const
@@ -96,7 +89,7 @@ public:
                     double a = i + pixXOffset[s] + easyUniform() * 0.25;
                     double b = j + pixYOffset[s] + easyUniform() * 0.25;
                     Ray ray = _camera->rayThroughFilm(a, b);
-                    Intersection intersection = (this->*_intersect)(ray);
+                    Intersection intersection = intersect(ray);
                     if (intersection.happen)
                         color += shader.getColor(intersection);
                     else

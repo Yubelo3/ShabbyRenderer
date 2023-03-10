@@ -8,4 +8,4 @@ set(CMAKE_CXX_FLAGS "-std=c++17 -fopenmp")
 set(OpenMP_CXX_FLAGS)
 set(CMAKE_BUILD_TYPE Debug)
 
-add_executable(ShabbyRenderer src/main.cpp)
+add_executable(ShabbyRenderer src/main.cpp dep/lodepng/lodepng.cpp)

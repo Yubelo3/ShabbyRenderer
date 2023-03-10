@@ -4,6 +4,7 @@
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
 #include "material.hpp"
+#include "texture.hpp"
 #include <cmath>
 #include "utils.hpp"
 
@@ -83,7 +84,7 @@ public:
     Renderable(){};
 
 public:
-    void setMaterial(MtlPtr mtl)
+    void setMaterial(const MtlPtr &mtl)
     {
         _material = mtl;
     }
@@ -91,6 +92,7 @@ public:
     {
         return _aabb;
     }
+    virtual void setTexture(const TexPtr &tex) = 0;
     virtual Intersection intersect(const Ray &) const = 0;
     virtual void transform(const Vec3 &s, const Vec3 &r, const Vec3 &t) = 0;
 };
@@ -99,6 +101,7 @@ class Shpere : public Renderable
 {
     using Vec3 = Eigen::Vector3d;
     using MtlPtr = std::shared_ptr<Material>;
+    using TexPtr = std::shared_ptr<Texture>;
 
 private:
     Vec3 _c = {0.0f, 0.0f, -5.0f};
@@ -150,7 +153,13 @@ public:
     void transform(const Vec3 &s, const Vec3 &r, const Vec3 &t)
     {
         _c += t;
-        _aabb.set(_aabb.min()+t,_aabb.max()+t);
+        _aabb.set(_aabb.min() + t, _aabb.max() + t);
+    }
+
+public:
+    void setTexture(const TexPtr &tex)
+    {
+        _texture = tex;
     }
 };
 
@@ -162,12 +171,13 @@ class Triangle : public Renderable
     using Vec2 = Eigen::Vector2d;
     using Mat3 = Eigen::Matrix3d;
     using MtlPtr = std::shared_ptr<Material>;
+    using TexPtr = std::shared_ptr<Texture>;
 
 private:
-    Vec3 _v[3];                  // counter-clockwise vertices
-    Vec2 _vt[3];                 // vertex uv
-    Vec3 _n[3] = {Vec3::Zero()}; // vertex normal
-    Vec3 _normal;                // face normal
+    Vec3 _v[3];                   // counter-clockwise vertices
+    Vec2 _vt[3] = {Vec2::Zero()}; // vertex uv
+    Vec3 _n[3] = {Vec3::Zero()};  // vertex normal
+    Vec3 _normal;                 // face normal
 
 public:
     Triangle(const Vec3 &v0, const Vec3 &v1, const Vec3 &v2)
@@ -217,24 +227,29 @@ public: // override functions
         double hitDir = (ray.dir().dot(_normal) > 0.0f ? -1.0f : 1.0f);
         inter.happen = true;
         inter.pos = ray(t);
+
+        // If no material specified, use default material
         if (_material)
             inter.mtl = _material;
         else
             inter.mtl = DEFAULT_MATERIAL;
-        if (_vt[0].isZero())
+
+        // If vertex normal specified, use interpolation between vertex normals
+        if (_n[0].isZero())
             inter.normal = _normal * hitDir;
         else
             inter.normal = (alpha * _n[0] + beta * _n[1] + gamma * _n[2]) * hitDir;
+
+        // If uv and texture specified, use interpolation to get diffuse color
+        if (!_vt[0].isZero() && _texture)
+        {
+            Vec2 uv = alpha * _vt[0] + beta * _vt[1] + gamma * _vt[2];
+            Vec3 color=_texture->getColor(uv[0],uv[1]);
+            inter.texColor = std::make_shared<Vec3>(color);
+        }
+
         inter.t = t;
         inter.viewDir = -ray.dir();
-
-        if (_texture)
-        {
-            inter.payload = std::make_shared<Payload>();
-            inter.payload->bcCoord = Vec3{alpha, beta, gamma};
-            inter.payload->texture = _texture;
-            inter.payload->uv = alpha * _vt[0] + beta * _vt[1] + gamma * _vt[2];
-        }
 
         return inter;
     }
@@ -244,6 +259,9 @@ public: // override functions
         _v[0] = _v[0].cwiseProduct(s);
         _v[1] = _v[1].cwiseProduct(s);
         _v[2] = _v[2].cwiseProduct(s);
+        _v[0] += t;
+        _v[1] += t;
+        _v[2] += t;
         Vec3 min = _v[0].cwiseMin(_v[1].cwiseMin(_v[2]));
         Vec3 max = _v[0].cwiseMax(_v[1].cwiseMax(_v[2]));
         _aabb.set(min, max);
@@ -266,6 +284,10 @@ public:
     void setFaceNormal(const Vec3 &n)
     {
         _normal = n.normalized();
+    }
+    void setTexture(const TexPtr &tex)
+    {
+        _texture = tex;
     }
 };
 
@@ -344,6 +366,7 @@ class Mesh : public Renderable
 {
     using Vec3 = Eigen::Vector3d;
     using MtlPtr = std::shared_ptr<Material>;
+    using TexPtr = std::shared_ptr<Texture>;
     using ObjPtr = std::shared_ptr<Renderable>;
     using NodePtr = std::shared_ptr<BVHNode>;
 
@@ -385,5 +408,10 @@ public: // parameter setters
     inline std::size_t numTriangles() const
     {
         return _primitives.size();
+    }
+    void setTexture(const TexPtr &tex) override
+    {
+        for (const ObjPtr &prim : _primitives)
+            prim->setTexture(tex);
     }
 };

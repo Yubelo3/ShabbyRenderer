@@ -12,6 +12,7 @@
 #include <ctime>
 #include "obj_loader.hpp"
 #include "easy_random.hpp"
+#include "../dep/lodepng/lodepng.h"
 
 using Vec3 = Eigen::Vector3d;
 using Mat3 = Eigen::Matrix3d;
@@ -93,9 +94,9 @@ void setSceneTriangle(Scene &scene)
 void setSceneMesh(Scene &scene)
 {
     MtlLoader mtlLoader("../res/model/model.mtl");
-    mtlLoader.materials()[3]->setKm(mtlLoader.materials()[3]->ks() * 1.0);
-    mtlLoader.materials()[1]->setKf(1.5);
-    mtlLoader.materials()[1]->setAttenuateCoeff(Vec3{0.9, 1.0, 0.9});
+    // mtlLoader.materials()[3]->setKm(mtlLoader.materials()[3]->ks() * 1.0);
+    mtlLoader.materials()[1]->setKf(1.1);
+    mtlLoader.materials()[1]->setAttenuateCoeff(Vec3{0.9, 0.95, 0.9});
     mtlLoader.materials()[1]->setKa(Vec3{0.1, 0.1, 0.1});
     mtlLoader.materials()[1]->setKd(Vec3{0.1, 0.1, 0.1});
     mtlLoader.materials()[1]->setKs(Vec3{0.2, 0.2, 0.2});
@@ -107,7 +108,7 @@ void setSceneMesh(Scene &scene)
     ObjPtr sphere5 = std::make_shared<Shpere>(Vec3{-0.0, -48.0, -10.0}, 45.0);
 
     tri->setMaterial(mtlLoader.materials()[1]);
-    tri->transform(Vec3{20.0, 20.0, 20.0}, Vec3::Zero(), Vec3::Zero());
+    tri->transform(Vec3::Ones(), Vec3::Zero(), Vec3{0.0,1.0,0.0});
     sphere1->setMaterial(mtlLoader.materials()[3]);
     sphere5->setMaterial(mtlLoader.materials()[3]);
 
@@ -150,6 +151,35 @@ void setSceneTransparent(Scene &scene)
     scene.addLight(light3);
 }
 
+void setSceneTexture(Scene &scene)
+{
+    MtlLoader mtlLoader("../res/model/model.mtl");
+    std::shared_ptr<Texture> tex=std::make_shared<Texture>("../res/models/rock/rock.png");
+    ObjLoader loader;
+    ObjPtr rock = loader.load("../res/models/rock/rock.obj");
+
+    mtlLoader.materials()[3]->setKm(mtlLoader.materials()[3]->ks() * 2.0);
+
+    ObjPtr sphere1 = std::make_shared<Shpere>(Vec3{4.0, 1.0, 3.0}, 1.0);
+    ObjPtr sphere5 = std::make_shared<Shpere>(Vec3{-0.0, -48.0, -10.0}, 45.0);
+
+    sphere1->setMaterial(mtlLoader.materials()[1]);
+    sphere5->setMaterial(mtlLoader.materials()[3]);
+    rock->setMaterial(mtlLoader.materials()[1]);
+    rock->setTexture(tex);
+
+    scene.addObject(sphere1);
+    scene.addObject(sphere5);
+    scene.addObject(rock);
+
+    LightPtr light1 = std::make_shared<PointLight>(Vec3{23.0, 23.0, 23.0}, Vec3{0.0, 0.0, 10.0});
+    LightPtr light2 = std::make_shared<AmbientLight>(Vec3{0.25, 0.25, 0.25});
+    LightPtr light3 = std::make_shared<ParallelLight>(BG_COLOR * 0.5, Vec3{0.0, -1.0, 0.0});
+    scene.addLight(light1);
+    scene.addLight(light2);
+    scene.addLight(light3);
+}
+
 void renderScene(void (*setter)(Scene &))
 {
     ImageEncoder writer(FILM_WIDTH, FILM_HEIGHT, "../imout.ppm");
@@ -165,9 +195,13 @@ void renderScene(void (*setter)(Scene &))
 
 int main()
 {
-    renderScene(setSceneMesh);
+    // renderScene(setSceneMesh);
     // renderScene(setSceneSphere);
     // renderScene(setSceneTransparent);
+    renderScene(setSceneTexture);
+
+    // Texture tex("../res/models/rock/rock.png");
+    // std::cout<<tex.getColor(0.5,0.5).transpose()<<"\n";
 
     return 0;
 }
