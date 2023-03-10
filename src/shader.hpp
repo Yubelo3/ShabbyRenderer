@@ -7,12 +7,13 @@
 #include "ray.hpp"
 #include "callback_base.hpp"
 #include "config.h"
+#include <cmath>
 
 class Scene;
 
 class Shader
 {
-    using Vec3 = Eigen::Vector3f;
+    using Vec3 = Eigen::Vector3d;
     using LightPtr = std::shared_ptr<Light>;
     using MtlPtr = std::shared_ptr<Material>;
 
@@ -31,7 +32,7 @@ public:
 
 class PhongShader : public Shader
 {
-    using Vec3 = Eigen::Vector3f;
+    using Vec3 = Eigen::Vector3d;
     using LightPtr = std::shared_ptr<Light>;
     using MtlPtr = std::shared_ptr<Material>;
 
@@ -45,14 +46,67 @@ private:
     }
     inline Vec3 _diffuse(const Vec3 &kd, const Vec3 &I, const Vec3 &N, const Vec3 &L) const
     {
-        float cosTheta = std::max(0.0f, N.dot(L));
+        double cosTheta = std::max(0.0, N.dot(L));
         return kd.cwiseProduct(I) * cosTheta;
     }
-    inline Vec3 _specular(const Vec3 &ks, const Vec3 &I, const Vec3 &N, const Vec3 &L, const Vec3 &V, const float p) const
+    inline Vec3 _specular(const Vec3 &ks, const Vec3 &I, const Vec3 &N, const Vec3 &L, const Vec3 &V, double p) const
     {
         Vec3 H = (L + V).normalized();
-        float cosAlpha = pow(std::max(0.0f, N.dot(H)), p);
+        double cosAlpha = pow(std::max(0.0, N.dot(H)), p);
         return ks.cwiseProduct(I) * cosAlpha;
+    }
+
+    inline static double _schlickApproxim(const Vec3 &L, const Vec3 &N, double n)
+    // use index of refraction to compute the proportion of reflection
+    // L is always the dir in air
+    {
+        double cosTheta = N.dot(L);
+        double R0 = pow(((n - 1.0) / (n + 1.0)), 2.0);
+        return R0 + (1.0 - R0) * pow(1 - cosTheta, 5.0);
+    }
+    inline static Vec3 _reflectDir(const Vec3 &L, const Vec3 &N)
+    {
+        double cosTheta = N.dot(L);
+        return 2.0 * cosTheta * N - L;
+    }
+    inline static Vec3 _refractDir(const Vec3 &L, const Vec3 &N, double n1, double n2)
+    // if total internal reflection happens, return Vec3::Zero
+    {
+        double cosTheta1 = N.dot(L);
+        double ifracRatio = n1 / n2;
+        double cos2Theta2 = 1.0 - ifracRatio * ifracRatio * (1 - cosTheta1 * cosTheta1);
+        if (cos2Theta2 < 0.0) // total internal reflection
+            return Vec3::Zero();
+        return -sqrt(cos2Theta2) * N - ifracRatio * (L - N * cosTheta1);
+    }
+
+    Vec3 _getInternalReflection(const Ray &ray, int depth = 1) const
+    {
+        if (depth > MAX_BOUNCE)
+            return Vec3::Zero();
+        Intersection inter = _scene->intersect(ray);
+        if (!inter.happen)
+            return BG_COLOR;
+        double n = inter.mtl->kf();
+        Vec3 a = inter.mtl->attenuateCoeff();
+        auto [kr, kg, kb] = std::array{a[0], a[1], a[2]};
+        double r = exp(inter.t * log(kr));
+        double g = exp(inter.t * log(kg));
+        double b = exp(inter.t * log(kb));
+        Vec3 attenuate{r, g, b};
+        Vec3 refractDir = _refractDir(-ray.dir(), inter.normal, n, 1.0);
+        if (refractDir.isZero())
+        {
+            Vec3 reflectDir = _reflectDir(-ray.dir(), inter.normal);
+            Ray reflectRay(inter.pos, reflectDir);
+            return _getInternalReflection(reflectRay, depth + 1).cwiseProduct(attenuate);
+        }
+        Ray refractRay(inter.pos, refractDir);
+        Intersection outInter = _scene->intersect(refractRay);
+        if(outInter.happen)
+            return getColor(outInter, depth + 1).cwiseProduct(attenuate);
+        else
+            return BG_COLOR.cwiseProduct(attenuate);
     }
 
 public:
@@ -63,13 +117,13 @@ public:
         Vec3 color = mtl->ke();
         Vec3 N = intersection.normal, V = intersection.viewDir;
         Vec3 ka = mtl->ka(), kd = mtl->kd(), ks = mtl->ks();
-        float p = mtl->ne();
+        double p = mtl->ne();
         for (const LightPtr &light : lights)
         {
             Vec3 I, L;
             light->idAt(intersection.pos, I, L);
 
-            if (L.norm() < 0.01f) // ambient
+            if (L.norm() < 0.01) // ambient
                 color += _ambient(ka, I);
             else
             {
@@ -82,59 +136,35 @@ public:
             }
         }
 
-        if (depth < MAX_BOUNCE && mtl->km().maxCoeff() > 0.01f)
+        if (depth < MAX_BOUNCE)
         {
-            float cosTheta = N.dot(V);
-            Vec3 R = 2.0f * cosTheta * N - V;
-            Ray reflectRay(intersection.pos, R);
-            Intersection reflectIntersection = _scene->intersect(reflectRay);
-            if (reflectIntersection.happen)
-                color += mtl->km().cwiseProduct(getColor(reflectIntersection, depth + 1));
+            if (mtl->km().maxCoeff() > 0.01) // ideal relection material
+            {
+                Ray reflectRay(intersection.pos, _reflectDir(V, N));
+                Intersection reflectIntersection = _scene->intersect(reflectRay);
+                if (reflectIntersection.happen)
+                    color += mtl->km().cwiseProduct(getColor(reflectIntersection, depth + 1));
+            }
+            else if (mtl->kf() > 0.01) // transparent material
+            {
+                double nReflect = _schlickApproxim(V, N, mtl->kf());
+                double nRefract = 1.0 - nReflect;
+
+                // compute reflection
+                Ray reflectRay(intersection.pos, _reflectDir(V, N));
+                Intersection reflectIntersection = _scene->intersect(reflectRay);
+                if (reflectIntersection.happen)
+                    color += nReflect * getColor(reflectIntersection, depth + 1);
+                else
+                    color += nReflect * BG_COLOR;
+
+                // compute refraction
+                Vec3 refractDir = _refractDir(V, N, 1.0, mtl->kf());
+                Ray refractRay(intersection.pos, refractDir);
+                color += nRefract * _getInternalReflection(refractRay,depth+1);
+            }
         }
 
         return color;
     }
 };
-
-// class BounceShader : public Shader
-// {
-//     using Vec3 = Eigen::Vector3f;
-//     using LightPtr = std::shared_ptr<Light>;
-//     using MtlPtr = std::shared_ptr<Material>;
-
-// public:
-//     BounceShader(){};
-
-// private:
-//     inline Vec3 _sampleUnitShpere() const
-//     {
-//         Vec3 ret = Vec3::Random();
-//         while (ret[0] * ret[0] + ret[1] * ret[1] + ret[2] * ret[2] > 1.0f)
-//             ret = Vec3::Random();
-//         return ret;
-//     }
-//     Ray _constructBounce(const Vec3 &pos, const Vec3 &N) const
-//     {
-//         Vec3 dst = pos + N + _sampleUnitShpere();
-//         return Ray(pos, dst - pos);
-//     }
-//     Vec3 _getColor(const std::vector<LightPtr> &lights, const Intersection &intersection, int depth) const
-//     {
-//         if (depth <= 0)
-//             return Vec3::Zero();
-//         float r = intersection.pos.norm();
-//         Ray bounceRay = _constructBounce(intersection.pos, intersection.normal);
-//         Intersection bounceIntersection = _scene->intersect(bounceRay);
-//         if (bounceIntersection.happen)
-//             return 0.5 * _getColor(lights, bounceIntersection, depth - 1);
-
-//         float t = 0.5 * (bounceRay.dir()[1] + 1.0);
-//         return (1.0f - t) * Vec3::Ones() + t * Vec3{0.3f, 0.5f, 0.5f};
-//     }
-
-// public:
-//     Vec3 getColor(const Intersection &intersection) const override
-//     {
-//         return _getColor(_scene->lights(), intersection, 50);
-//     }
-// };

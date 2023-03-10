@@ -13,8 +13,8 @@
 #include "obj_loader.hpp"
 #include "easy_random.hpp"
 
-using Vec3 = Eigen::Vector3f;
-using Mat3 = Eigen::Matrix3f;
+using Vec3 = Eigen::Vector3d;
+using Mat3 = Eigen::Matrix3d;
 using ObjPtr = std::shared_ptr<Renderable>;
 using CameraPtr = std::shared_ptr<Camera>;
 using LightPtr = std::shared_ptr<Light>;
@@ -36,13 +36,13 @@ CameraPtr initCamera()
 void setSceneSphere(Scene &scene)
 {
     MtlLoader mtlLoader("../res/model/model.mtl");
-    mtlLoader.materials()[3]->setKm(mtlLoader.materials()[3]->ks() * 2.0f);
+    mtlLoader.materials()[3]->setKm(mtlLoader.materials()[3]->ks() * 2.0);
 
-    ObjPtr sphere1 = std::make_shared<Shpere>(Vec3{2.0f, -2.0f, -8.0f}, 1.0f);
-    ObjPtr sphere2 = std::make_shared<Shpere>(Vec3{-3.0f, 2.0f, -10.0f}, 2.0f);
-    ObjPtr sphere3 = std::make_shared<Shpere>(Vec3{2.0f, 2.0f, -10.0f}, 1.0f);
-    ObjPtr sphere4 = std::make_shared<Shpere>(Vec3{-2.0f, -2.0f, -10.0f}, 2.0f);
-    ObjPtr sphere5 = std::make_shared<Shpere>(Vec3{-0.0f, -51.0f, -10.0f}, 45.0f);
+    ObjPtr sphere1 = std::make_shared<Shpere>(Vec3{2.0, -2.0, -8.0}, 1.0);
+    ObjPtr sphere2 = std::make_shared<Shpere>(Vec3{-3.0, 2.0, -10.0}, 2.0);
+    ObjPtr sphere3 = std::make_shared<Shpere>(Vec3{2.0, 2.0, -10.0}, 1.0);
+    ObjPtr sphere4 = std::make_shared<Shpere>(Vec3{-2.0, -2.0, -10.0}, 2.0);
+    ObjPtr sphere5 = std::make_shared<Shpere>(Vec3{-0.0, -51.0, -10.0}, 45.0);
     sphere1->setMaterial(mtlLoader.materials()[0]);
     sphere2->setMaterial(mtlLoader.materials()[1]);
     sphere3->setMaterial(mtlLoader.materials()[2]);
@@ -54,9 +54,9 @@ void setSceneSphere(Scene &scene)
     scene.addObject(sphere4);
     scene.addObject(sphere5);
 
-    LightPtr light1 = std::make_shared<PointLight>(Vec3{23.0f, 23.0f, 23.0f}, Vec3{0.0f, 0.0f, 0.0f});
-    LightPtr light2 = std::make_shared<AmbientLight>(Vec3{0.25f, 0.25f, 0.25f});
-    LightPtr light3 = std::make_shared<ParallelLight>(BG_COLOR * 0.5f, Vec3{0.0f, -1.0f, 0.0f});
+    LightPtr light1 = std::make_shared<PointLight>(Vec3{23.0, 23.0, 23.0}, Vec3{0.0, 0.0, 0.0});
+    LightPtr light2 = std::make_shared<AmbientLight>(Vec3{0.25, 0.25, 0.25});
+    LightPtr light3 = std::make_shared<ParallelLight>(BG_COLOR * 0.5, Vec3{0.0, -1.0, 0.0});
     scene.addLight(light1);
     scene.addLight(light2);
     scene.addLight(light3);
@@ -65,12 +65,12 @@ void setSceneSphere(Scene &scene)
 void setSceneTriangle(Scene &scene)
 {
     MtlLoader mtlLoader("../res/model/model.mtl");
-    mtlLoader.materials()[3]->setKm(mtlLoader.materials()[3]->ks() * 2.0f);
+    mtlLoader.materials()[3]->setKm(mtlLoader.materials()[3]->ks() * 2.0);
 
-    ObjPtr triangle1 = std::make_shared<Triangle>(Vec3{-2.0f, 0.0f, -10.0f}, Vec3{2.0f, 0.0f, -10.0f}, Vec3{0.0f, 2.0f, -8.0f});
-    ObjPtr triangle2 = std::make_shared<Triangle>(Vec3{-2.0f, -3.0f, -8.0f}, Vec3{1.0f, -5.0f, -10.0f}, Vec3{0.0f, 2.0f, -4.0f});
-    ObjPtr sphere1 = std::make_shared<Shpere>(Vec3{2.0f, -2.0f, -8.0f}, 1.0f);
-    ObjPtr sphere5 = std::make_shared<Shpere>(Vec3{-0.0f, -51.0f, -10.0f}, 45.0f);
+    ObjPtr triangle1 = std::make_shared<Triangle>(Vec3{-2.0, 0.0, -10.0}, Vec3{2.0, 0.0, -10.0}, Vec3{0.0, 2.0, -8.0});
+    ObjPtr triangle2 = std::make_shared<Triangle>(Vec3{-2.0, -3.0, -8.0}, Vec3{1.0, -5.0, -10.0}, Vec3{0.0, 2.0, -4.0});
+    ObjPtr sphere1 = std::make_shared<Shpere>(Vec3{2.0, -2.0, -8.0}, 1.0);
+    ObjPtr sphere5 = std::make_shared<Shpere>(Vec3{-0.0, -51.0, -10.0}, 45.0);
 
     triangle1->setMaterial(mtlLoader.materials()[3]);
     triangle2->setMaterial(mtlLoader.materials()[3]);
@@ -82,9 +82,9 @@ void setSceneTriangle(Scene &scene)
     scene.addObject(sphere1);
     scene.addObject(sphere5);
 
-    LightPtr light1 = std::make_shared<PointLight>(Vec3{23.0f, 23.0f, 23.0f}, Vec3{0.0f, 0.0f, 0.0f});
-    LightPtr light2 = std::make_shared<AmbientLight>(Vec3{0.25f, 0.25f, 0.25f});
-    LightPtr light3 = std::make_shared<ParallelLight>(BG_COLOR * 0.5f, Vec3{0.0f, -1.0f, 0.0f});
+    LightPtr light1 = std::make_shared<PointLight>(Vec3{23.0, 23.0, 23.0}, Vec3{0.0, 0.0, 0.0});
+    LightPtr light2 = std::make_shared<AmbientLight>(Vec3{0.25, 0.25, 0.25});
+    LightPtr light3 = std::make_shared<ParallelLight>(BG_COLOR * 0.5, Vec3{0.0, -1.0, 0.0});
     scene.addLight(light1);
     scene.addLight(light2);
     scene.addLight(light3);
@@ -93,14 +93,21 @@ void setSceneTriangle(Scene &scene)
 void setSceneMesh(Scene &scene)
 {
     MtlLoader mtlLoader("../res/model/model.mtl");
-    mtlLoader.materials()[3]->setKm(mtlLoader.materials()[3]->ks() * 2.0f);
+    mtlLoader.materials()[3]->setKm(mtlLoader.materials()[3]->ks() * 1.0);
+    mtlLoader.materials()[1]->setKf(1.5);
+    mtlLoader.materials()[1]->setAttenuateCoeff(Vec3{0.9, 1.0, 0.9});
+    mtlLoader.materials()[1]->setKa(Vec3{0.1, 0.1, 0.1});
+    mtlLoader.materials()[1]->setKd(Vec3{0.1, 0.1, 0.1});
+    mtlLoader.materials()[1]->setKs(Vec3{0.2, 0.2, 0.2});
 
     ObjLoader loader;
-    ObjPtr tri = loader.load("../res/model/teapot.obj");
-    ObjPtr sphere1 = std::make_shared<Shpere>(Vec3{4.0f, -2.0f, -8.0f}, 1.0f);
-    ObjPtr sphere5 = std::make_shared<Shpere>(Vec3{-0.0f, -48.0f, -10.0f}, 45.0f);
-    
-    tri->setMaterial(mtlLoader.materials()[3]);
+    // ObjPtr tri = loader.load("../res/model/teapot.obj");
+    ObjPtr tri = loader.load("../res/models/bunny/bunny.obj");
+    ObjPtr sphere1 = std::make_shared<Shpere>(Vec3{1.0, 2.0, -4.0}, 1.0);
+    ObjPtr sphere5 = std::make_shared<Shpere>(Vec3{-0.0, -48.0, -10.0}, 45.0);
+
+    tri->setMaterial(mtlLoader.materials()[1]);
+    tri->transform(Vec3{20.0, 20.0, 20.0}, Vec3::Zero(), Vec3::Zero());
     sphere1->setMaterial(mtlLoader.materials()[3]);
     sphere5->setMaterial(mtlLoader.materials()[3]);
 
@@ -108,9 +115,36 @@ void setSceneMesh(Scene &scene)
     scene.addObject(sphere1);
     scene.addObject(sphere5);
 
-    LightPtr light1 = std::make_shared<PointLight>(Vec3{23.0f, 23.0f, 23.0f}, Vec3{0.0f, 0.0f, 10.0f});
-    LightPtr light2 = std::make_shared<AmbientLight>(Vec3{0.25f, 0.25f, 0.25f});
-    LightPtr light3 = std::make_shared<ParallelLight>(BG_COLOR * 0.5f, Vec3{0.0f, -1.0f, 0.0f});
+    LightPtr light1 = std::make_shared<PointLight>(Vec3{50.0, 50.0, 50.0}, Vec3{-10.0, 10.0, 2.0});
+    LightPtr light2 = std::make_shared<AmbientLight>(Vec3{0.25, 0.25, 0.25});
+    LightPtr light3 = std::make_shared<ParallelLight>(BG_COLOR * 0.2f, Vec3{0.0, -1.0, 0.0});
+    scene.addLight(light1);
+    scene.addLight(light2);
+    scene.addLight(light3);
+}
+
+void setSceneTransparent(Scene &scene)
+{
+    MtlLoader mtlLoader("../res/model/model.mtl");
+    mtlLoader.materials()[3]->setKm(mtlLoader.materials()[3]->ks() * 2.0);
+    mtlLoader.materials()[1]->setKf(1.6f);
+    mtlLoader.materials()[1]->setAttenuateCoeff(Vec3{0.9f, 1.0, 0.9f});
+    mtlLoader.materials()[1]->setKa(Vec3{0.1f, 0.1f, 0.1f});
+    mtlLoader.materials()[1]->setKd(Vec3{0.1f, 0.1f, 0.1f});
+    mtlLoader.materials()[1]->setKs(Vec3{0.2f, 0.2f, 0.2f});
+
+    ObjPtr sphere1 = std::make_shared<Shpere>(Vec3{4.0, 1.0, 3.0}, 1.0);
+    ObjPtr sphere5 = std::make_shared<Shpere>(Vec3{-0.0, -48.0, -10.0}, 45.0);
+
+    sphere1->setMaterial(mtlLoader.materials()[1]);
+    sphere5->setMaterial(mtlLoader.materials()[3]);
+
+    scene.addObject(sphere1);
+    scene.addObject(sphere5);
+
+    LightPtr light1 = std::make_shared<PointLight>(Vec3{23.0, 23.0, 23.0}, Vec3{0.0, 0.0, 10.0});
+    LightPtr light2 = std::make_shared<AmbientLight>(Vec3{0.25, 0.25, 0.25});
+    LightPtr light3 = std::make_shared<ParallelLight>(BG_COLOR * 0.5, Vec3{0.0, -1.0, 0.0});
     scene.addLight(light1);
     scene.addLight(light2);
     scene.addLight(light3);
@@ -131,8 +165,9 @@ void renderScene(void (*setter)(Scene &))
 
 int main()
 {
-    // renderScene(setSceneMesh);
-    renderScene(setSceneSphere);
+    renderScene(setSceneMesh);
+    // renderScene(setSceneSphere);
+    // renderScene(setSceneTransparent);
 
     return 0;
 }

@@ -9,7 +9,7 @@
 
 class AABB
 {
-    using Vec3 = Eigen::Vector3f;
+    using Vec3 = Eigen::Vector3d;
 
 private:
     Vec3 _min = {INF, INF, INF};
@@ -22,13 +22,13 @@ public:
 public:
     bool intersect(const Ray &ray) const
     {
-        float tMin = 0.0f, tMax = INF;
+        double tMin = 0.0f, tMax = INF;
         Vec3 O = ray.orig();
         Vec3 D = ray.dir();
         for (int i : {0, 1, 2})
         {
-            float minBound = _min[i], maxBound = _max[i];
-            float tMinBound = (minBound - O[i]) / D[i], tMaxBound = (maxBound - O[i]) / D[i];
+            double minBound = _min[i], maxBound = _max[i];
+            double tMinBound = (minBound - O[i]) / D[i], tMaxBound = (maxBound - O[i]) / D[i];
             if (tMinBound > tMaxBound)
                 std::swap(tMinBound, tMaxBound);
             tMin = std::max(tMin, tMinBound);
@@ -70,6 +70,7 @@ public:
 
 class Renderable
 {
+    using Vec3 = Eigen::Vector3d;
     using MtlPtr = std::shared_ptr<Material>;
     using TexPtr = std::shared_ptr<Texture>;
 
@@ -91,20 +92,20 @@ public:
         return _aabb;
     }
     virtual Intersection intersect(const Ray &) const = 0;
-    virtual void transform() = 0;
+    virtual void transform(const Vec3 &s, const Vec3 &r, const Vec3 &t) = 0;
 };
 
 class Shpere : public Renderable
 {
-    using Vec3 = Eigen::Vector3f;
+    using Vec3 = Eigen::Vector3d;
     using MtlPtr = std::shared_ptr<Material>;
 
 private:
     Vec3 _c = {0.0f, 0.0f, -5.0f};
-    float _r = 2.0f;
+    double _r = 2.0f;
 
 public:
-    Shpere(const Vec3 &c, float r) : _c(c), _r(r)
+    Shpere(const Vec3 &c, double r) : _c(c), _r(r)
     {
         _aabb.set(c - Vec3{r, r, r}, c + Vec3{r, r, r});
     }
@@ -116,13 +117,13 @@ public:
         if (!_aabb.intersect(ray))
             return Intersection();
         Vec3 o = ray.orig() - _c, d = ray.dir();
-        float A = d.dot(d), B = 2 * o.dot(d), C = o.dot(o) - _r * _r;
-        float delta = B * B - 4 * A * C;
+        double A = d.dot(d), B = 2 * o.dot(d), C = o.dot(o) - _r * _r;
+        double delta = B * B - 4 * A * C;
         if (delta < 0.0f)
             return Intersection();
-        float tMin = (-B - sqrt(delta)) / 2.0f / A;
-        float tMax = (-B + sqrt(delta)) / 2.0f / A;
-        float t;
+        double tMin = (-B - sqrt(delta)) / 2.0f / A;
+        double tMax = (-B + sqrt(delta)) / 2.0f / A;
+        double t;
         if (tMin > tMax)
             std::swap(tMin, tMax);
         if (tMax < EPS)
@@ -137,6 +138,8 @@ public:
         inter.viewDir = -ray.dir();
         inter.pos = ray.orig() + t * d;
         inter.normal = (inter.pos - _c).normalized();
+        if (ray.dir().dot(inter.normal) > 0.0f)
+            inter.normal = -inter.normal;
         if (_material)
             inter.mtl = _material;
         else
@@ -144,8 +147,10 @@ public:
         return inter;
     }
 
-    void transform() override
+    void transform(const Vec3 &s, const Vec3 &r, const Vec3 &t)
     {
+        _c += t;
+        _aabb.set(_aabb.min()+t,_aabb.max()+t);
     }
 };
 
@@ -153,9 +158,9 @@ class Triangle : public Renderable
 {
     // By default, triangle use (v1-v0).cross(v2-v0) as face normal
     // This can be changed via setFaceNormal()
-    using Vec3 = Eigen::Vector3f;
-    using Vec2 = Eigen::Vector2f;
-    using Mat3 = Eigen::Matrix3f;
+    using Vec3 = Eigen::Vector3d;
+    using Vec2 = Eigen::Vector2d;
+    using Mat3 = Eigen::Matrix3d;
     using MtlPtr = std::shared_ptr<Material>;
 
 private:
@@ -189,27 +194,27 @@ public: // override functions
         const Vec3 &a_b = _v[0] - _v[1], a_c = _v[0] - _v[2], d = ray.dir(), b = _v[0] - ray.orig();
         Mat3 A, Beta, Gamma, T;
         A << a_b, a_c, d;
-        float detA = A.determinant();
+        double detA = A.determinant();
         if (std::abs(detA) < EPS)
             return inter;
 
         Beta << b, a_c, d;
-        float beta = Beta.determinant() / detA;
+        double beta = Beta.determinant() / detA;
         if (beta < 0.0 || beta > 1.0f)
             return inter;
 
         Gamma << a_b, b, d;
-        float gamma = Gamma.determinant() / detA;
+        double gamma = Gamma.determinant() / detA;
         if (gamma < 0.0f || gamma + beta > 1.0f)
             return inter;
 
         T << a_b, a_c, b;
-        float t = T.determinant() / detA;
+        double t = T.determinant() / detA;
         if (t < EPS)
             return inter;
-        float alpha = 1.0f - beta - gamma;
+        double alpha = 1.0f - beta - gamma;
 
-        float hitDir = (ray.dir().dot(_normal) > 0.0f ? -1.0f : 1.0f);
+        double hitDir = (ray.dir().dot(_normal) > 0.0f ? -1.0f : 1.0f);
         inter.happen = true;
         inter.pos = ray(t);
         if (_material)
@@ -219,9 +224,9 @@ public: // override functions
         if (_vt[0].isZero())
             inter.normal = _normal * hitDir;
         else
-            inter.normal = alpha * _n[0] + beta * _n[1] + gamma * _n[2];
+            inter.normal = (alpha * _n[0] + beta * _n[1] + gamma * _n[2]) * hitDir;
         inter.t = t;
-        inter.viewDir = ray.dir();
+        inter.viewDir = -ray.dir();
 
         if (_texture)
         {
@@ -234,8 +239,14 @@ public: // override functions
         return inter;
     }
 
-    void transform() override
+    void transform(const Vec3 &s, const Vec3 &r, const Vec3 &t)
     {
+        _v[0] = _v[0].cwiseProduct(s);
+        _v[1] = _v[1].cwiseProduct(s);
+        _v[2] = _v[2].cwiseProduct(s);
+        Vec3 min = _v[0].cwiseMin(_v[1].cwiseMin(_v[2]));
+        Vec3 max = _v[0].cwiseMax(_v[1].cwiseMax(_v[2]));
+        _aabb.set(min, max);
     }
 
 public:
@@ -262,7 +273,7 @@ class BVHNode
 {
     using ObjPtr = std::shared_ptr<Renderable>;
     using NodePtr = std::shared_ptr<BVHNode>;
-    using Vec3 = Eigen::Vector3f;
+    using Vec3 = Eigen::Vector3d;
 
 private:
     NodePtr _left = nullptr;
@@ -304,7 +315,7 @@ public:
 
         int maxDim;
         root->_aabb.len().maxCoeff(&maxDim);
-        float divisionx2 = root->_aabb.min()[maxDim] + root->_aabb.max()[maxDim];
+        double divisionx2 = root->_aabb.min()[maxDim] + root->_aabb.max()[maxDim];
 
         for (const ObjPtr &obj : objs)
         {
@@ -331,7 +342,7 @@ public:
 
 class Mesh : public Renderable
 {
-    using Vec3 = Eigen::Vector3f;
+    using Vec3 = Eigen::Vector3d;
     using MtlPtr = std::shared_ptr<Material>;
     using ObjPtr = std::shared_ptr<Renderable>;
     using NodePtr = std::shared_ptr<BVHNode>;
@@ -353,8 +364,11 @@ public: // override functions
         inter.mtl = _material;
         return inter;
     }
-    void transform() override
+    void transform(const Vec3 &s, const Vec3 &r, const Vec3 &t)
     {
+        for (const ObjPtr &prim : _primitives)
+            prim->transform(s, r, t);
+        buildBVH();
     }
 
 public: // parameter setters

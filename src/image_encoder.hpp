@@ -9,7 +9,7 @@
 
 class ImageEncoder
 {
-    using Vec3 = Eigen::Vector3f;
+    using Vec3 = Eigen::Vector3d;
 
 private:
     std::string _filepath = "imout.ppm";
@@ -32,13 +32,13 @@ public:
             << _width << " " << _height << '\n'
             << 255 << '\n'; // Binary representation
 
-        float *data = (float *)vData;
+        double *data = (double *)vData;
         int offset = 0;
         for (int i = 0; i < _height; i++)
             for (int j = 0; j < _width; j++)
                 for (int k = 0; k < 3; k++)
                 {
-                    float value = std::clamp(*(data + offset), 0.0f, 1.0f);
+                    double value = std::clamp(*(data + offset), 0.0, 1.0);
                     // gamma矫正
                     value = pow(value, 1.0f / 2.2f);
 

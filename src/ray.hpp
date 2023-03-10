@@ -3,7 +3,7 @@
 
 class Ray
 {
-    using Vec3 = Eigen::Vector3f;
+    using Vec3 = Eigen::Vector3d;
 
 private:
     Vec3 _orig;
@@ -18,7 +18,7 @@ public:
     }
 
 public:
-    inline Vec3 operator()(float t) const
+    inline Vec3 operator()(double t) const
     {
         return _orig + t * _dir;
     }

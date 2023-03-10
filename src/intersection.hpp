@@ -6,17 +6,17 @@
 
 class Intersection
 {
-    using Vec3 = Eigen::Vector3f;
+    using Vec3 = Eigen::Vector3d;
     using MtlPtr = std::shared_ptr<Material>;
     using VecPtr = std::shared_ptr<Vec3>;
     using PlPtr = std::shared_ptr<Payload>;
 
 public:
     bool happen = false;
-    float t = INF;
-    Vec3 viewDir = {0.0f, 0.0f, 1.0f};
-    Vec3 pos = {0.0f, 0.0f, 0.0f};
-    Vec3 normal = {1.0f, 0.0f, 0.0f};
+    double t = INF;
+    Vec3 viewDir = {0.0, 0.0, 1.0};
+    Vec3 pos = {0.0, 0.0, 0.0};
+    Vec3 normal = {1.0, 0.0, 0.0};
     MtlPtr mtl = DEFAULT_MATERIAL;
     PlPtr payload = nullptr;  //if exists, contains bcCoord and texture pointer
 };

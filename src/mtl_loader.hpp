@@ -8,7 +8,7 @@
 
 class MtlLoader
 {
-    using Vec3 = Eigen::Vector3f;
+    using Vec3 = Eigen::Vector3d;
     using MtlPtr = std::shared_ptr<Material>;
 
 private:

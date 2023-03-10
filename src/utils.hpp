@@ -8,13 +8,13 @@
         exit(-1);                                      \
     }
 
-const float INF = std::numeric_limits<float>::infinity();
+const double INF = std::numeric_limits<double>::infinity();
 
-const float PI = 3.1415926;
+const double PI = 3.1415926535897;
 
-const float EPS = 5e-4f;
+const double EPS = 1e-5;
 
-inline float degree2radian(float d)
+inline double degree2radian(double d)
 {
-    return d * PI / 180.0f;
+    return d * PI / 180.0;
 }

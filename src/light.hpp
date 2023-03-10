@@ -3,7 +3,7 @@
 
 class Light
 {
-    using Vec3 = Eigen::Vector3f;
+    using Vec3 = Eigen::Vector3d;
 
 public:
     // Compute intensity and direction at a specific point
@@ -12,11 +12,11 @@ public:
 
 class PointLight : public Light
 {
-    using Vec3 = Eigen::Vector3f;
+    using Vec3 = Eigen::Vector3d;
 
 private:
-    Vec3 _intensity = {2.0f, 2.0f, 2.0f};
-    Vec3 _pos = {0.0f, 0.0f, 0.0f};
+    Vec3 _intensity = {2.0, 2.0, 2.0};
+    Vec3 _pos = {0.0, 0.0, 0.0};
 
 public:
     PointLight(const Vec3 &intensity, const Vec3 &pos) : _intensity(intensity), _pos(pos){};
@@ -25,7 +25,7 @@ public:
     void idAt(const Vec3 &pos, Vec3 &intensity, Vec3 &dir) const override
     {
         dir = _pos - pos;
-        float r = dir.norm();
+        double r = dir.norm();
         dir /= r;
         intensity = _intensity / r / r;
     }
@@ -33,10 +33,10 @@ public:
 
 class AmbientLight : public Light
 {
-    using Vec3 = Eigen::Vector3f;
+    using Vec3 = Eigen::Vector3d;
 
 private:
-    Vec3 _intensity = {2.0f, 2.0f, 2.0f};
+    Vec3 _intensity = {2.0, 2.0, 2.0};
 
 public:
     AmbientLight(const Vec3 &intensity) : _intensity(intensity){};
@@ -45,17 +45,17 @@ public:
     void idAt(const Vec3 &pos, Vec3 &intensity, Vec3 &dir) const override
     {
         intensity = _intensity;
-        dir = {0.0f, 0.0f, 0.0f};
+        dir = {0.0, 0.0, 0.0};
     }
 };
 
 class ParallelLight : public Light
 {
-    using Vec3 = Eigen::Vector3f;
+    using Vec3 = Eigen::Vector3d;
 
 private:
-    Vec3 _intensity = {2.0f, 2.0f, 2.0f};
-    Vec3 _dir = {0.0f, 0.0f, -1.0f};
+    Vec3 _intensity = {2.0, 2.0, 2.0};
+    Vec3 _dir = {0.0, 0.0, -1.0};
 
 public:
     ParallelLight(const Vec3 &intensity, const Vec3 &dir) : _intensity(intensity), _dir(dir.normalized()){};

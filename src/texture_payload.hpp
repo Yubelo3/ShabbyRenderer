@@ -4,8 +4,8 @@
 
 class Payload
 {
-    using Vec3 = Eigen::Vector3f;
-    using Vec2 = Eigen::Vector2f;
+    using Vec3 = Eigen::Vector3d;
+    using Vec2 = Eigen::Vector2d;
     using TexPtr = std::shared_ptr<Texture>;
 
 public:

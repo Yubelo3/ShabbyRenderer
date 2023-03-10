@@ -13,7 +13,7 @@
 
 class Scene : public SceneBase
 {
-    using Vec3 = Eigen::Vector3f;
+    using Vec3 = Eigen::Vector3d;
     using ObjPtr = std::shared_ptr<Renderable>;
     using LightPtr = std::shared_ptr<Light>;
     using CameraPtr = std::shared_ptr<Camera>;
@@ -76,10 +76,10 @@ public:
 
     void render() const
     {
-        float pixXOffset[] = {-0.25, -0.25, 0.25, 0.25};
-        float pixYOffset[] = {-0.25, 0.25, -0.25, 0.25};
+        double pixXOffset[] = {-0.25, -0.25, 0.25, 0.25};  //perform anti-aliasing
+        double pixYOffset[] = {-0.25, 0.25, -0.25, 0.25};
         int w = _camera->nHorzPix(), h = _camera->nVertPix();
-        std::uniform_real_distribution<float> distrib(-0.25, 0.25);
+        std::uniform_real_distribution<double> distrib(-0.25, 0.25);
         for (int i = 0; i < h; i++)
         {
             printf("%d/%d\n", i, h);
@@ -93,16 +93,16 @@ public:
                 Vec3 color = Vec3::Zero();
                 for (int s = 0; s < 4; s++)
                 {
-                    float a = i + pixXOffset[s] + easyUniform() * 0.25;
-                    float b = j + pixYOffset[s] + easyUniform() * 0.25;
+                    double a = i + pixXOffset[s] + easyUniform() * 0.25;
+                    double b = j + pixYOffset[s] + easyUniform() * 0.25;
                     Ray ray = _camera->rayThroughFilm(a, b);
                     Intersection intersection = (this->*_intersect)(ray);
                     if (intersection.happen)
-                        color += shader.getColor(intersection); // TODO: 颜色计算
+                        color += shader.getColor(intersection);
                     else
                         color += BG_COLOR;
                 }
-                _frameBuffer[bufferOffset] = color / 4.0f;
+                _frameBuffer[bufferOffset] = color / 4.0;
             }
         }
     }

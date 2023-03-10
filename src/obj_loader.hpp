@@ -8,8 +8,8 @@
 
 class ObjLoader
 {
-    using Vec3 = Eigen::Vector3f;
-    using Vec2 = Eigen::Vector2f;
+    using Vec3 = Eigen::Vector3d;
+    using Vec2 = Eigen::Vector2d;
     using IVec3 = Eigen::Vector3i;
     using ObjPtr = std::shared_ptr<Renderable>;
     using TriPtr = std::shared_ptr<Triangle>;

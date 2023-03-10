@@ -6,16 +6,18 @@
 
 class Material
 {
-    using Vec3 = Eigen::Vector3f;
+    using Vec3 = Eigen::Vector3d;
 
 private:
     std::string _name;
-    Vec3 _ka = {1.0f, 1.0f, 1.0f};
-    Vec3 _kd = {1.0f, 1.0f, 1.0f};
-    Vec3 _ks = {1.0f, 1.0f, 1.0f};
-    Vec3 _ke = Vec3::Zero(); // emitting
-    Vec3 _km = Vec3::Zero(); // reflection
-    float _ne = 100.0f;
+    Vec3 _ka = {1.0, 1.0, 1.0};
+    Vec3 _kd = {1.0, 1.0, 1.0};
+    Vec3 _ks = {1.0, 1.0, 1.0};
+    double _ne = 100.0;
+    Vec3 _ke = Vec3::Zero();                   // emitting
+    Vec3 _km = Vec3::Zero();                   // reflection
+    double _kf = 0.0;                          // index of refraction(only for transparent material)
+    Vec3 _attenuateCoeff = {0.1, 0.1, 0.1}; // only for transparent material
     std::shared_ptr<Texture> _texture = nullptr;
 
 public:
@@ -48,7 +50,15 @@ public:
     {
         return _km;
     }
-    inline float ne() const
+    inline const Vec3 &attenuateCoeff() const
+    {
+        return _attenuateCoeff;
+    }
+    inline double kf() const
+    {
+        return _kf;
+    }
+    inline double ne() const
     {
         return _ne;
     }
@@ -76,7 +86,15 @@ public:
     {
         _km = km;
     }
-    void setNe(float ne)
+    void setAttenuateCoeff(const Vec3 &att)
+    {
+        _attenuateCoeff = att;
+    }
+    void setKf(double kf)
+    {
+        _kf = kf;
+    }
+    void setNe(double ne)
     {
         _ne = ne;
     }
