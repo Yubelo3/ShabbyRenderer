@@ -136,21 +136,23 @@ public:
             if (L.norm() < 0.01) // ambient
                 color += _ambient(ka, I);
             else
-            {
-                double at=1.0;
-                Ray shadowRay(intersection.pos, L);
-                Intersection shadowInter=_scene->intersect(shadowRay);
-                if (shadowInter.happen)
+                for(int i=0;i<MULTI_SHADOW_RAY;i++)
                 {
-                    if(shadowInter.mtl->kf()>1.0)
-                        at/=pow(shadowInter.mtl->kf(),0.8);
-                    else
-                        continue;
+                    double at=1.0;
+                    Ray shadowRay(intersection.pos, L);
+                    Intersection shadowInter=_scene->intersect(shadowRay);
+                    if (shadowInter.happen)
+                    {
+                        if(shadowInter.mtl->kf()>1.0)
+                            at/=pow(shadowInter.mtl->kf(),0.8);
+                        else
+                            continue;
+                    }
+
+                    color += at*_diffuse(kd, I, N, L)/MULTI_SHADOW_RAY; // diffuse term
+                    color += at*_specular(ks, I, N, L, V, p)/MULTI_SHADOW_RAY;
                 }
 
-                color += at*_diffuse(kd, I, N, L); // diffuse term
-                color += at*_specular(ks, I, N, L, V, p);
-            }
         }
 
         //manage reflection and refraction

@@ -1,5 +1,6 @@
 #pragma once
 #include <eigen3/Eigen/Core>
+#include "easy_random.hpp"
 
 class Light
 {
@@ -65,5 +66,29 @@ public:
     {
         intensity = _intensity;
         dir = -_dir;
+    }
+};
+
+class AreaLight : public Light
+{
+    using Vec3 = Eigen::Vector3d;
+
+private:
+    Vec3 _intensity = {2.0, 2.0, 2.0};
+    Vec3 _center = Vec3::Zero();
+    Vec3 _a;
+    Vec3 _b;
+
+public:
+    AreaLight(const Vec3 &intensity, const Vec3 &center, const Vec3 &a, const Vec3 &b) : _intensity(intensity), _center(center), _a(a), _b(b){};
+
+public:
+    void idAt(const Vec3 &pos, Vec3 &intensity, Vec3 &dir) const override
+    {
+        Vec3 samplePos = _center + easyUniform() * _a + easyUniform() * _b;
+        dir = samplePos - pos;
+        double r = dir.norm();
+        dir /= r;
+        intensity = _intensity / r / r;
     }
 };
