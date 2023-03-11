@@ -31,7 +31,7 @@ git submodule init
 git submodule update
 ```
 
-3. Build makefile  
+3. Build ShabbyRenderer
 ```bash
 cd 'project dir'
 mkdir build
@@ -45,3 +45,4 @@ make
 cd build
 ./ShabbyRenderer
 ```
+It takes about 170 seconds to render the 1024x768 preview image on i5-8300H CPU @ 2.30GHz × 8.  
