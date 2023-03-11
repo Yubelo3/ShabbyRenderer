@@ -83,20 +83,20 @@ void setTestScene(Scene &scene)
     scene.addObject(bunny);
 
     // Set lights
-    LightPtr light1 = std::make_shared<PointLight>(Vec3{50.0, 50.0, 50.0}, Vec3{-4.0, 10.0, 0.0});
+    // LightPtr light1 = std::make_shared<PointLight>(Vec3{50.0, 50.0, 50.0}, Vec3{-4.0, 10.0, 0.0});
     // for(int i=0;i<8;i++)
     // {
     //     LightPtr areaLight = std::make_shared<AreaLight>(Vec3{15.0,15.0,15.0},Vec3{0.0,10.0,0.0},Vec3{1.0,0.0,0.0},Vec3{0.0,1.0,0.0});
     //     scene.addLight(areaLight);
     // }
-    // LightPtr areaLight = std::make_shared<AreaLight>(Vec3{180.0,180.0,180.0},Vec3{0.0,10.0,0.0},Vec3{1.0,0.0,0.0},Vec3{0.0,1.0,0.0});
+    LightPtr areaLight = std::make_shared<AreaLight>(Vec3{180.0,180.0,180.0},Vec3{0.0,10.0,0.0},Vec3{1.0,0.0,0.0},Vec3{0.0,1.0,0.0});
     LightPtr light2 = std::make_shared<AmbientLight>(Vec3{0.28, 0.28, 0.28});
     LightPtr light3 = std::make_shared<ParallelLight>(BG_COLOR * 0.3, Vec3{0.0, 0.0, -1.0});
     LightPtr light4 = std::make_shared<PointLight>(Vec3{3.0, 3.0, 3.0}, Vec3{-10.0, -1.0, 3.0});
 
     // Add lights to scene
-    scene.addLight(light1);
-    // scene.addLight(areaLight);
+    // scene.addLight(light1);
+    scene.addLight(areaLight);
     scene.addLight(light2);
     scene.addLight(light3);
     scene.addLight(light4);

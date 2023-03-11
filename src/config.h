@@ -22,6 +22,6 @@ const double CAMERA_FOCAL_LENGTH = 1.0f;
 const double CAMERA_HFOV = 60.0f;
 const double CAMERA_ASPECT_RATIO = (double)FILM_WIDTH / FILM_HEIGHT;
 
-int MULTI_SHADOW_RAY = 1;
+int MULTI_SHADOW_RAY = 8;
 
 const int MAX_BOUNCE = 10;
