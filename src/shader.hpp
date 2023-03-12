@@ -163,22 +163,18 @@ public:
         {
             if (mtl->km().maxCoeff() > 0.01) // ideal mirror reflection material
             {
-                Ray reflectRay(intersection.pos, _reflectDir(V, N));
-                Intersection reflectIntersection = _scene->intersect(reflectRay);
-                if (reflectIntersection.happen)
-                    color += mtl->km().cwiseProduct(getColor(reflectIntersection, depth + 1));
-            }
-            else if(mtl->kg().maxCoeff()>0.01)  //glossy mirror reflection
-            {
                 Vec3 ref=_reflectDir(V, N);
                 Vec3 dst=intersection.pos+ref;
-                dst[0]+=easyUniform()*mtl->g();
-                dst[1]+=easyUniform()*mtl->g();
-                dst[2]+=easyUniform()*mtl->g();
+                if(mtl->g()>0.0)
+                {
+                    dst[0]+=easyUniform()*mtl->g();
+                    dst[1]+=easyUniform()*mtl->g();
+                    dst[2]+=easyUniform()*mtl->g();
+                }
                 Ray reflectRay(intersection.pos, dst-intersection.pos);
                 Intersection reflectIntersection = _scene->intersect(reflectRay);
                 if (reflectIntersection.happen)
-                    color += mtl->kg().cwiseProduct(getColor(reflectIntersection, depth + 1));
+                    color += mtl->km().cwiseProduct(getColor(reflectIntersection, depth + 1));
             }
             else if (mtl->kf() > 0.01) // transparent material
             {

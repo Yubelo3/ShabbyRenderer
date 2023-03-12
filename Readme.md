@@ -1,9 +1,9 @@
 # ShabbyRenderer  
 
-![avatar](img/composited_area_light.png)  
+![avatar](img/soft_matte.png)  
 <p>
-    <img width="360" alt="Example 1" src="img/multi_shadow_ray.png"/>
-    <img width="360" alt="Example 2" src="img/preview.png"/>
+    <img width="400" alt="Example 1" src="img/soft_glossy.png"/>
+    <img width="400" alt="Example 2" src="img/hard_glossy.png"/>
 </p>
 
 

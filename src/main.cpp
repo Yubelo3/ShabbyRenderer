@@ -32,7 +32,7 @@ CameraPtr initCamera()
     return camera;
 }
 
-void setTestScene(Scene &scene)
+void setTestScene_ideal_hard(Scene &scene)
 {
     // load material and texture
     MtlLoader mtlLoader("../res/model/model.mtl");
@@ -48,8 +48,7 @@ void setTestScene(Scene &scene)
     ObjPtr mirrorSphere = std::make_shared<Shpere>(Vec3{-0.0, -46.0, -10.0}, 45.0);
 
     // Set ideal mirror reflection material
-    mtlLoader.materials()[3]->setKg(mtlLoader.materials()[3]->ks()*1.52);
-    mtlLoader.materials()[3]->setG(0.03);
+    mtlLoader.materials()[3]->setKm(mtlLoader.materials()[3]->ks()*1.52);
     mtlLoader.materials()[3]->setNe(600.0);
     mtlLoader.materials()[3]->setKd(Vec3{0.6,0.6,0.6});
     mtlLoader.materials()[3]->setKa(Vec3{0.6,0.6,0.6});
@@ -59,7 +58,7 @@ void setTestScene(Scene &scene)
     mtlLoader.materials()[1]->setKf(1.6f);
     mtlLoader.materials()[1]->setAttenuateCoeff(Vec3{0.9f, 0.93, 0.9f});
     mtlLoader.materials()[1]->setKa(Vec3{0.1, 0.1, 0.1});
-    mtlLoader.materials()[1]->setKd(Vec3{0.1, 0.1, 0.1});
+    mtlLoader.materials()[1]->setKd(Vec3{0.2, 0.2, 0.2});
     mtlLoader.materials()[1]->setKs(Vec3{0.2, 0.2, 0.2f});
 
     mtlLoader.materials()[2]->setKf(1.7);
@@ -84,20 +83,145 @@ void setTestScene(Scene &scene)
     scene.addObject(bunny);
 
     // Set lights
-    // LightPtr light1 = std::make_shared<PointLight>(Vec3{50.0, 50.0, 50.0}, Vec3{-4.0, 10.0, 0.0});
-    for(int i=0;i<20;i++)
-    {
-        LightPtr areaLight = std::make_shared<AreaLight>(Vec3{3.0,3.0,3.0},Vec3{0.0,10.0,0.0},Vec3{1.5,0.0,0.0},Vec3{0.0,1.5,0.0});
-        scene.addLight(areaLight);
-    }
-    // LightPtr areaLight = std::make_shared<AreaLight>(Vec3{180.0,180.0,180.0},Vec3{0.0,10.0,0.0},Vec3{1.5,0.0,0.0},Vec3{0.0,1.5,0.0});
+    LightPtr light1 = std::make_shared<PointLight>(Vec3{50.0, 50.0, 50.0}, Vec3{-4.0, 10.0, 0.0});
     LightPtr light2 = std::make_shared<AmbientLight>(Vec3{0.22, 0.22, 0.22});
     LightPtr light3 = std::make_shared<ParallelLight>(BG_COLOR * 0.3, Vec3{0.0, 0.0, -1.0});
     LightPtr light4 = std::make_shared<PointLight>(Vec3{3.0, 3.0, 3.0}, Vec3{-10.0, -1.0, 3.0});
 
     // Add lights to scene
-    // scene.addLight(light1);
-    // scene.addLight(areaLight);
+    scene.addLight(light1);
+    scene.addLight(light2);
+    scene.addLight(light3);
+    scene.addLight(light4);
+}
+
+void setTestScene_ideal_soft(Scene &scene)
+{
+    // load material and texture
+    MtlLoader mtlLoader("../res/model/model.mtl");
+    std::shared_ptr<Texture> tex = std::make_shared<Texture>("../res/models/rock/rock.png");
+
+    // load meshes, create primitives
+    ObjLoader loader;
+    ObjPtr rock = loader.load("../res/models/rock/rock.obj");
+    rock->transform(Vec3::Ones(),Vec3::Zero(),Vec3{-4.0,0.0,0.0});
+    ObjPtr bunny = loader.load("../res/models/bunny/bunny.obj");
+    ObjPtr blackShpere = std::make_shared<Shpere>(Vec3{4.0, 1.0, 1.0}, 1.0);
+    ObjPtr transparentShpere = std::make_shared<Shpere>(Vec3{2.5, 1.0, 3.0}, 1.0);
+    ObjPtr mirrorSphere = std::make_shared<Shpere>(Vec3{-0.0, -46.0, -10.0}, 45.0);
+
+    // Set ideal mirror reflection material
+    mtlLoader.materials()[3]->setKm(mtlLoader.materials()[3]->ks()*1.52);
+    mtlLoader.materials()[3]->setNe(600.0);
+    mtlLoader.materials()[3]->setKd(Vec3{0.6,0.6,0.6});
+    mtlLoader.materials()[3]->setKa(Vec3{0.6,0.6,0.6});
+    mtlLoader.materials()[3]->setKs(Vec3{0.8,0.8,0.8});
+
+    // Set transparent material
+    mtlLoader.materials()[1]->setKf(1.6f);
+    mtlLoader.materials()[1]->setAttenuateCoeff(Vec3{0.9f, 0.93, 0.9f});
+    mtlLoader.materials()[1]->setKa(Vec3{0.1, 0.1, 0.1});
+    mtlLoader.materials()[1]->setKd(Vec3{0.2, 0.2, 0.2});
+    mtlLoader.materials()[1]->setKs(Vec3{0.2, 0.2, 0.2f});
+
+    mtlLoader.materials()[2]->setKf(1.7);
+    mtlLoader.materials()[2]->setAttenuateCoeff(Vec3{0.2, 0.5, 0.2});
+    mtlLoader.materials()[2]->setKa(Vec3{0.1, 0.1, 0.1});
+    mtlLoader.materials()[2]->setKd(Vec3{0.1, 0.1, 0.1});
+    mtlLoader.materials()[2]->setKs(Vec3{0.5, 0.5, 0.5});
+
+    // Set material for objects
+    // blackShpere->setMaterial(mtlLoader.materials()[0]);
+    transparentShpere->setMaterial(mtlLoader.materials()[2]);
+    mirrorSphere->setMaterial(mtlLoader.materials()[3]);
+    rock->setMaterial(mtlLoader.materials()[0]);
+    rock->setTexture(tex);
+    bunny->setMaterial(mtlLoader.materials()[1]);
+
+    // Add objects to scene
+    scene.addObject(blackShpere);
+    scene.addObject(transparentShpere);
+    scene.addObject(mirrorSphere);
+    scene.addObject(rock);
+    scene.addObject(bunny);
+
+    // Set lights
+    for(int i=0;i<20;i++)
+    {
+        LightPtr areaLight = std::make_shared<AreaLight>(Vec3{3.0,3.0,3.0},Vec3{0.0,10.0,0.0},Vec3{1.5,0.0,0.0},Vec3{0.0,1.5,0.0});
+        scene.addLight(areaLight);
+    }
+    LightPtr light2 = std::make_shared<AmbientLight>(Vec3{0.22, 0.22, 0.22});
+    LightPtr light3 = std::make_shared<ParallelLight>(BG_COLOR * 0.3, Vec3{0.0, 0.0, -1.0});
+    LightPtr light4 = std::make_shared<PointLight>(Vec3{3.0, 3.0, 3.0}, Vec3{-10.0, -1.0, 3.0});
+
+    // Add lights to scene
+    scene.addLight(light2);
+    scene.addLight(light3);
+    scene.addLight(light4);
+}
+
+void setTestScene_matte_soft(Scene &scene)
+{
+    // load material and texture
+    MtlLoader mtlLoader("../res/model/model.mtl");
+    std::shared_ptr<Texture> tex = std::make_shared<Texture>("../res/models/rock/rock.png");
+
+    // load meshes, create primitives
+    ObjLoader loader;
+    ObjPtr rock = loader.load("../res/models/rock/rock.obj");
+    rock->transform(Vec3::Ones(),Vec3::Zero(),Vec3{-4.0,0.0,0.0});
+    ObjPtr bunny = loader.load("../res/models/bunny/bunny.obj");
+    ObjPtr blackShpere = std::make_shared<Shpere>(Vec3{4.0, 1.0, 1.0}, 1.0);
+    ObjPtr transparentShpere = std::make_shared<Shpere>(Vec3{2.5, 1.0, 3.0}, 1.0);
+    ObjPtr mirrorSphere = std::make_shared<Shpere>(Vec3{-0.0, -46.0, -10.0}, 45.0);
+
+    // Set ideal mirror reflection material
+    mtlLoader.materials()[3]->setKm(mtlLoader.materials()[3]->ks()*1.52);
+    mtlLoader.materials()[3]->setG(0.08);
+    mtlLoader.materials()[3]->setNe(600.0);
+    mtlLoader.materials()[3]->setKd(Vec3{0.6,0.6,0.6});
+    mtlLoader.materials()[3]->setKa(Vec3{0.6,0.6,0.6});
+    mtlLoader.materials()[3]->setKs(Vec3{0.8,0.8,0.8});
+
+    // Set transparent material
+    mtlLoader.materials()[1]->setKf(1.6f);
+    mtlLoader.materials()[1]->setAttenuateCoeff(Vec3{0.9f, 0.93, 0.9f});
+    mtlLoader.materials()[1]->setKa(Vec3{0.1, 0.1, 0.1});
+    mtlLoader.materials()[1]->setKd(Vec3{0.2, 0.2, 0.2});
+    mtlLoader.materials()[1]->setKs(Vec3{0.2, 0.2, 0.2f});
+
+    mtlLoader.materials()[2]->setKf(1.7);
+    mtlLoader.materials()[2]->setAttenuateCoeff(Vec3{0.2, 0.5, 0.2});
+    mtlLoader.materials()[2]->setKa(Vec3{0.1, 0.1, 0.1});
+    mtlLoader.materials()[2]->setKd(Vec3{0.1, 0.1, 0.1});
+    mtlLoader.materials()[2]->setKs(Vec3{0.5, 0.5, 0.5});
+
+    // Set material for objects
+    transparentShpere->setMaterial(mtlLoader.materials()[2]);
+    mirrorSphere->setMaterial(mtlLoader.materials()[3]);
+    rock->setMaterial(mtlLoader.materials()[0]);
+    rock->setTexture(tex);
+    bunny->setMaterial(mtlLoader.materials()[1]);
+
+    // Add objects to scene
+    scene.addObject(blackShpere);
+    scene.addObject(transparentShpere);
+    scene.addObject(mirrorSphere);
+    scene.addObject(rock);
+    scene.addObject(bunny);
+
+    // Set lights
+    for(int i=0;i<10;i++)
+    {
+        LightPtr areaLight = std::make_shared<AreaLight>(Vec3{6.0,6.0,6.0},Vec3{0.0,10.0,0.0},Vec3{1.5,0.0,0.0},Vec3{0.0,1.5,0.0});
+        scene.addLight(areaLight);
+    }
+    LightPtr light2 = std::make_shared<AmbientLight>(Vec3{0.22, 0.22, 0.22});
+    LightPtr light3 = std::make_shared<ParallelLight>(BG_COLOR * 0.3, Vec3{0.0, 0.0, -1.0});
+    LightPtr light4 = std::make_shared<PointLight>(Vec3{3.0, 3.0, 3.0}, Vec3{-10.0, -1.0, 3.0});
+
+    // Add lights to scene
     scene.addLight(light2);
     scene.addLight(light3);
     scene.addLight(light4);
@@ -118,7 +242,7 @@ void renderScene(void (*setter)(Scene &))
 
 int main()
 {
-    renderScene(setTestScene);
+    renderScene(setTestScene_matte_soft);
 
     return 0;
 }
