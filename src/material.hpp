@@ -14,9 +14,11 @@ private:
     Vec3 _kd = {1.0, 1.0, 1.0};
     Vec3 _ks = {1.0, 1.0, 1.0};
     double _ne = 100.0;
-    Vec3 _ke = Vec3::Zero();                   // emitting
-    Vec3 _km = Vec3::Zero();                   // reflection
-    double _kf = 0.0;                          // index of refraction(only for transparent material)
+    Vec3 _ke = Vec3::Zero();                // emitting
+    Vec3 _km = Vec3::Zero();                // ideal mirror reflection
+    Vec3 _kg = Vec3::Zero();                // "matte" mirror reflection
+    double _g = 0.05;                        // Defines how "matte" the material is
+    double _kf = 0.0;                       // index of refraction(only for transparent material)
     Vec3 _attenuateCoeff = {0.1, 0.1, 0.1}; // only for transparent material
     std::shared_ptr<Texture> _texture = nullptr;
 
@@ -50,6 +52,10 @@ public:
     {
         return _km;
     }
+    inline const Vec3 &kg() const
+    {
+        return _kg;
+    }
     inline const Vec3 &attenuateCoeff() const
     {
         return _attenuateCoeff;
@@ -61,6 +67,10 @@ public:
     inline double ne() const
     {
         return _ne;
+    }
+    inline double g() const
+    {
+        return _g;
     }
     void setName(const std::string &name)
     {
@@ -86,6 +96,10 @@ public:
     {
         _km = km;
     }
+    void setKg(const Vec3 &kg)
+    {
+        _kg = kg;
+    }
     void setAttenuateCoeff(const Vec3 &att)
     {
         _attenuateCoeff = att;
@@ -97,6 +111,10 @@ public:
     void setNe(double ne)
     {
         _ne = ne;
+    }
+    void setG(double g)
+    {
+        _g = g;
     }
     void setTexture(std::shared_ptr<Texture> texture)
     {

@@ -79,6 +79,14 @@ private:
             return Vec3::Zero();
         return -sqrt(cos2Theta2) * N - ifracRatio * (L - N * cosTheta1);
     }
+    inline static Vec3 _attenuate(const Vec3& attenCoeff,double t)
+    {
+        auto [kr, kg, kb] = std::array{attenCoeff[0], attenCoeff[1], attenCoeff[2]};
+        double r = exp(t * log(kr));
+        double g = exp(t * log(kg));
+        double b = exp(t * log(kb));
+        return Vec3{r, g, b};
+    }
 
     Vec3 _getInternalReflection(const Ray &ray, int depth = 1) const
     {
@@ -88,12 +96,7 @@ private:
         if (!inter.happen)
             return BG_COLOR;
         double n = inter.mtl->kf();
-        Vec3 a = inter.mtl->attenuateCoeff();
-        auto [kr, kg, kb] = std::array{a[0], a[1], a[2]};
-        double r = exp(inter.t * log(kr));
-        double g = exp(inter.t * log(kg));
-        double b = exp(inter.t * log(kb));
-        Vec3 attenuate{r, g, b};
+        Vec3 attenuate=_attenuate(inter.mtl->attenuateCoeff(),inter.t);
         if (attenuate.maxCoeff() < 0.05)
             return Vec3::Zero();
         Vec3 refractDir = _refractDir(-ray.dir(), inter.normal, n, 1.0);
@@ -105,7 +108,7 @@ private:
         Ray reflectRay(inter.pos, reflectDir);
         Vec3 reflection = _getInternalReflection(reflectRay, depth + 1).cwiseProduct(attenuate);
         if (refractDir.isZero()) // total internal reflection
-            return reflection.cwiseProduct(attenuate);
+            return reflection.cwiseProduct(attenuate);  
 
         Ray refractRay(inter.pos, refractDir);
         Intersection outInter = _scene->intersect(refractRay);
@@ -158,12 +161,24 @@ public:
         //manage reflection and refraction
         if (depth < MAX_BOUNCE)
         {
-            if (mtl->km().maxCoeff() > 0.01) // ideal relection material
+            if (mtl->km().maxCoeff() > 0.01) // ideal mirror reflection material
             {
                 Ray reflectRay(intersection.pos, _reflectDir(V, N));
                 Intersection reflectIntersection = _scene->intersect(reflectRay);
                 if (reflectIntersection.happen)
                     color += mtl->km().cwiseProduct(getColor(reflectIntersection, depth + 1));
+            }
+            else if(mtl->kg().maxCoeff()>0.01)  //glossy mirror reflection
+            {
+                Vec3 ref=_reflectDir(V, N);
+                Vec3 dst=intersection.pos+ref;
+                dst[0]+=easyUniform()*mtl->g();
+                dst[1]+=easyUniform()*mtl->g();
+                dst[2]+=easyUniform()*mtl->g();
+                Ray reflectRay(intersection.pos, dst-intersection.pos);
+                Intersection reflectIntersection = _scene->intersect(reflectRay);
+                if (reflectIntersection.happen)
+                    color += mtl->kg().cwiseProduct(getColor(reflectIntersection, depth + 1));
             }
             else if (mtl->kf() > 0.01) // transparent material
             {

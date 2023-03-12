@@ -48,7 +48,8 @@ void setTestScene(Scene &scene)
     ObjPtr mirrorSphere = std::make_shared<Shpere>(Vec3{-0.0, -46.0, -10.0}, 45.0);
 
     // Set ideal mirror reflection material
-    mtlLoader.materials()[3]->setKm(mtlLoader.materials()[3]->ks()*1.5);
+    mtlLoader.materials()[3]->setKg(mtlLoader.materials()[3]->ks()*1.52);
+    mtlLoader.materials()[3]->setG(0.03);
     mtlLoader.materials()[3]->setNe(600.0);
     mtlLoader.materials()[3]->setKd(Vec3{0.6,0.6,0.6});
     mtlLoader.materials()[3]->setKa(Vec3{0.6,0.6,0.6});
@@ -57,19 +58,19 @@ void setTestScene(Scene &scene)
     // Set transparent material
     mtlLoader.materials()[1]->setKf(1.6f);
     mtlLoader.materials()[1]->setAttenuateCoeff(Vec3{0.9f, 0.93, 0.9f});
-    mtlLoader.materials()[1]->setKa(Vec3{0.1f, 0.1f, 0.1f});
-    mtlLoader.materials()[1]->setKd(Vec3{0.1f, 0.1f, 0.1f});
-    mtlLoader.materials()[1]->setKs(Vec3{0.2f, 0.2f, 0.2f});
+    mtlLoader.materials()[1]->setKa(Vec3{0.1, 0.1, 0.1});
+    mtlLoader.materials()[1]->setKd(Vec3{0.1, 0.1, 0.1});
+    mtlLoader.materials()[1]->setKs(Vec3{0.2, 0.2, 0.2f});
 
-    mtlLoader.materials()[2]->setKf(1.2f);
-    mtlLoader.materials()[2]->setAttenuateCoeff(Vec3{0.9f, 0.9, 0.98f});
-    mtlLoader.materials()[2]->setKa(Vec3{0.1f, 0.1f, 0.1f});
-    mtlLoader.materials()[2]->setKd(Vec3{0.1f, 0.1f, 0.1f});
-    mtlLoader.materials()[2]->setKs(Vec3{0.2f, 0.2f, 0.2f});
+    mtlLoader.materials()[2]->setKf(1.7);
+    mtlLoader.materials()[2]->setAttenuateCoeff(Vec3{0.2, 0.5, 0.2});
+    mtlLoader.materials()[2]->setKa(Vec3{0.1, 0.1, 0.1});
+    mtlLoader.materials()[2]->setKd(Vec3{0.1, 0.1, 0.1});
+    mtlLoader.materials()[2]->setKs(Vec3{0.5, 0.5, 0.5});
 
     // Set material for objects
     // blackShpere->setMaterial(mtlLoader.materials()[0]);
-    transparentShpere->setMaterial(mtlLoader.materials()[1]);
+    transparentShpere->setMaterial(mtlLoader.materials()[2]);
     mirrorSphere->setMaterial(mtlLoader.materials()[3]);
     rock->setMaterial(mtlLoader.materials()[0]);
     rock->setTexture(tex);
@@ -84,19 +85,19 @@ void setTestScene(Scene &scene)
 
     // Set lights
     // LightPtr light1 = std::make_shared<PointLight>(Vec3{50.0, 50.0, 50.0}, Vec3{-4.0, 10.0, 0.0});
-    // for(int i=0;i<8;i++)
-    // {
-    //     LightPtr areaLight = std::make_shared<AreaLight>(Vec3{15.0,15.0,15.0},Vec3{0.0,10.0,0.0},Vec3{1.0,0.0,0.0},Vec3{0.0,1.0,0.0});
-    //     scene.addLight(areaLight);
-    // }
-    LightPtr areaLight = std::make_shared<AreaLight>(Vec3{180.0,180.0,180.0},Vec3{0.0,10.0,0.0},Vec3{1.0,0.0,0.0},Vec3{0.0,1.0,0.0});
-    LightPtr light2 = std::make_shared<AmbientLight>(Vec3{0.28, 0.28, 0.28});
+    for(int i=0;i<20;i++)
+    {
+        LightPtr areaLight = std::make_shared<AreaLight>(Vec3{3.0,3.0,3.0},Vec3{0.0,10.0,0.0},Vec3{1.5,0.0,0.0},Vec3{0.0,1.5,0.0});
+        scene.addLight(areaLight);
+    }
+    // LightPtr areaLight = std::make_shared<AreaLight>(Vec3{180.0,180.0,180.0},Vec3{0.0,10.0,0.0},Vec3{1.5,0.0,0.0},Vec3{0.0,1.5,0.0});
+    LightPtr light2 = std::make_shared<AmbientLight>(Vec3{0.22, 0.22, 0.22});
     LightPtr light3 = std::make_shared<ParallelLight>(BG_COLOR * 0.3, Vec3{0.0, 0.0, -1.0});
     LightPtr light4 = std::make_shared<PointLight>(Vec3{3.0, 3.0, 3.0}, Vec3{-10.0, -1.0, 3.0});
 
     // Add lights to scene
     // scene.addLight(light1);
-    scene.addLight(areaLight);
+    // scene.addLight(areaLight);
     scene.addLight(light2);
     scene.addLight(light3);
     scene.addLight(light4);

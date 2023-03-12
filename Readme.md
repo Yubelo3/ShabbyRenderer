@@ -16,6 +16,7 @@ This repository contains a trivial implementation of pure-CPU ray tracer, which 
 * BVH accelerated ray-object intersection
 * Transparent material  
 * Ideal mirror reflection  
+* "Matte" mirror reflection  
 * Hard shadow for point light
 * Soft shadow for area light
 * Blurred soft shadow for composited area light
